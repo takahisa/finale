@@ -1,0 +1,23 @@
+metal
+====
+
+metal is an invertible-syntax library for OCaml.
+
+## Requirements
+
+- omake >= 0.10.0
+- ocaml >= 4.04
+- re >= 1.7.1
+
+## How to build
+
+Install [OPAM](https://opam.ocaml.org/) into your system, and run the following commands.
+```
+  opam install omake re
+  git clone http://github.com/takahisa/metal.git metal
+  cd metal && omake
+```
+
+## License
+
+metal released under the [MIT License](https://raw.githubusercontent.com/takahisa/parseq/master/LICENSE.txt).
