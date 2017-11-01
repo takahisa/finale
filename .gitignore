@@ -1,0 +1,9 @@
+*.omc
+*.omakedb
+*.omakedb.cache
+*.cmo
+*.cmx
+*.cmi
+*.out
+*.a
+*.o
