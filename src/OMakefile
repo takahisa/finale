@@ -23,7 +23,7 @@ if $(not $(OCAMLFIND_EXISTS))
     eprintln(You need to install ocamlfind and run "omake --configure")
     exit 1
 
-PROGRAM = syntax-representation
+PROGRAM = metal
 MAIN    = main
 
 USE_OCAMLFIND  = true
@@ -38,7 +38,7 @@ OCAMLOPTFLAGS           +=
 OCAML_LINK_FLAGS        +=
 OCAML_BYTE_LINK_FLAGS   +=
 OCAML_NATIVE_LINK_FLAGS +=
-OCAML_LIBS              += ../lib/syntax-representation
+OCAML_LIBS              += ../lib/metal
 OCAML_LIB_FLAGS         +=
 OCAML_CLIBS             +=
 OCAML_OTHER_LIBS        +=
