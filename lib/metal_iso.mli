@@ -23,7 +23,15 @@ type ('a, 'b) iso =
   { fwd: 'a -> 'b option;
     bwd: 'b -> 'a option; }
 
-val identity: ('a, 'a) iso
+val iso: ('a -> 'b option) -> ('b -> 'a option) -> ('a, 'b) iso
+val fwd: ('a, 'b) iso -> ('a -> 'b option)
+val bwd: ('a, 'b) iso -> ('b -> 'a option)
 
+val identity: ('a, 'a) iso
 val compose: ('a, 'b) iso -> ('b, 'c) iso -> ('a, 'c) iso
 val inverse: ('a, 'b) iso -> ('b, 'a) iso
+
+val commute: ('a * 'b, 'b * 'a) iso
+val element: ?comparator:('a -> 'a -> bool) -> 'a -> (unit, 'a) iso
+val subset: ('a -> bool) -> ('a, 'a) iso
+

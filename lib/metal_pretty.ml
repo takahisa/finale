@@ -20,124 +20,121 @@
  * THE SOFTWARE.
  *)
 open Metal_iso
+open Metal_aux
 open Metal_source
 
-type 'a repr =
-  { run: (position * 'a) -> (position * string) option }
+type 'a repr = { run: input:'a -> string option }
 
 let ( <$> ) d0 p0 =
-  { run = fun (at, a0) ->
-        match d0.bwd a0 with
-        | Some b0 ->
-          p0.run (at, b0)
-        | None ->
-          None
+  { run = 
+      fun ~input:b0 ->
+        Option.concat_map (d0.bwd b0) ~f:(fun a0 -> p0.run ~input:a0)
   }
-  
+
 let ( <*> ) p0 p1 =
-  { run = fun (at, (a0, b0)) ->
-        match p0.run (at, a0) with
-        | Some (at, s0) -> begin
-            match p1.run (at, b0) with
-            | Some (at, s1) ->
-              Some (at, s0 ^ s1)
-            | None ->
-              None
-          end
-        | None ->
-          None
+  { run = 
+      fun ~input:(a0, b0) ->
+        Option.map ~f:(fun (z0, z1) -> z0 ^ z1) @@
+          Option.(p0.run ~input:a0 *** p1.run ~input:b0)
   }
 
 let ( <|> ) p0 p1 =
-  { run = fun (at, a0) ->
-        match p0.run (at, a0) with
-        | Some (at, s0) ->
-          Some (at, s0)
+  { run =
+      fun ~input:a0 ->
+        match p0.run ~input:a0 with
+        | Some z0 ->
+          Some z0
         | None ->
-          p1.run (at, a0)
+          p0.run ~input:a0
   }
 
 let ( <* ) p0 p1 =
-  { run = fun (at, a0) ->
-        match p0.run (at, a0) with
-        | Some (at, s0) -> begin
-            match p1.run (at, ()) with
-            | Some (at, s1) ->
-              Some (at, s0 ^ s1)
-            | None ->
-              None
+  { run =
+      fun ~input:a0 ->
+        Option.concat_map (p0.run ~input:a0) ~f:begin fun z0 ->
+          Option.concat_map (p1.run ~input:()) ~f:begin fun z1 ->
+            Some (z0 ^ z1)
           end
-        | None ->
-          None
+        end
   }
 
 let ( *> ) p0 p1 =
-  { run = fun (at, a0) ->
-        match p0.run (at, ()) with
-        | Some (at, s0) -> begin
-            match p1.run (at, a0) with
-            | Some (at, s1) ->
-              Some (at, s0 ^ s1)
-            | None ->
-              None
+  { run =
+      fun ~input:a1 ->
+        Option.concat_map (p0.run ~input:()) ~f:begin fun z0 ->
+          Option.concat_map (p1.run ~input:a1) ~f:begin fun z1 ->
+            Some (z0 ^ z1)
           end
-        | None ->
-          None
+        end
   }
 
-let hold f =
-  let lazy_p = Lazy.from_fun f in
-  { run = fun (at, a0) -> (Lazy.force lazy_p).run (at, a0) }
+let ( <$ ) p0 d0 =
+  { run =
+      fun ~input:() ->
+        Option.concat_map (d0.fwd ()) ~f:(fun a0 -> p0.run ~input:a0)
+  }
+
+let ( $> ) p0 d0 =
+  { run =
+      fun ~input:a0 ->
+        Option.concat_map (d0.bwd a0) ~f:(fun () -> p0.run ~input:a0)
+  }
 
 let fail =
-  { run = fun _ -> None }
+  { run = fun ~input:_ -> None }
 
-let rec rep p0 acc =
-  { run = function
-      | (at, a0 :: rest) -> begin
-          match p0.run (at, a0) with
-          | Some (at, s0) ->
-            (rep p0 (s0 :: acc)).run (at, rest)
-          | None ->
-            None
-        end
-      | (at, []) ->
-        Some (at, String.concat "" @@ List.rev acc)
-  }
+let rec rep p = function
+  | [] ->
+    Some ""
+  | h :: t ->
+    Option.concat_map (p.run ~input:h) ~f:begin fun z0 ->
+      Option.concat_map (rep p t) ~f:begin fun z1 ->
+        Some (z0 ^ z1)
+      end
+    end
 
-let rep0 p0 = rep p0 []
-let rep1 p0 = rep p0 []
+let rep0 p0 = { run = fun ~input:as0 -> rep p0 as0 }
+let rep1 p0 = { run = fun ~input:as0 -> rep p0 as0 }
 
-let sep p0 p1 =
-  { run = function
-      | (at, a0 :: rest) -> begin
-          match p1.run (at, a0) with
-          | Some (at, s0) ->
-            (rep (p0 *> p1) [s0]).run (at, rest)
-          | None ->
-            None
-        end
-      | (at, []) ->
-        Some (at, "")
-  }
-let sep0 = sep
-let sep1 = sep
+let sep p0 p1 = function
+  | [] ->
+    Some ""
+  | h :: t ->
+    Option.concat_map (p1.run ~input:h) ~f:begin fun z0 ->
+      Option.concat_map (rep (p0 *> p1) t) ~f:begin fun z1 ->
+        Some (z0 ^ z1)
+      end
+    end
+
+let sep0 p0 p1 = { run = fun ~input:as0 -> sep p0 p1 as0 }
+let sep1 p0 p1 = { run = fun ~input:as0 -> sep p0 p1 as0 }
 
 let sep_end p0 p1 =
-  rep (p1 <* p0) []
+  rep (p1 <* p0)
 
-let sep_end0 = sep_end
-let sep_end1 = sep_end
+let sep_end0 p0 p1 = { run = fun ~input:as0 -> sep_end p0 p1 as0 }
+let sep_end1 p0 p1 = { run = fun ~input:as0 -> sep_end p0 p1 as0 }
 
-let spaces =
-  { run = fun (at, ()) -> Some (at, " ") }
-let spaces0 = spaces
-let spaces1 = spaces
+let spaces0 = { run = fun ~input:_ -> Some " " }
+let spaces1 = { run = fun ~input:_ -> Some " " }
 
+let between lp rp p0 =
+  lp *> p0 <* rp
 
-let show ?(at = nowhere) f input =
-  match (f ()).run (at, input) with
-  | Some (_, res) ->
-    Some res
-  | None ->
-    None
+let any =
+  { run = fun ~input:c -> Some (String.make 1 c) }
+
+let lower =
+  subset (fun c -> Char.lowercase_ascii c = c) <$>
+    { run = fun ~input:c -> Some (String.make 1 c) }
+let upper =
+  subset (fun c -> Char.uppercase_ascii c = c) <$>
+    { run = fun ~input:c -> Some (String.make 1 c) }
+let digit =
+  let _0 = Char.code '0' in
+  let _9 = Char.code '9' in
+  subset (fun c -> let n = Char.code c in (_0 <= n && n <= _9)) <$>
+    { run = fun ~input:c -> Some (String.make 1 c) }
+
+let show: (unit -> 'a repr) -> 'a -> string option =
+  fun f -> fun a0 -> (f ()).run ~input:a0

@@ -22,7 +22,16 @@
 type ('a, 'b) iso =
   { fwd: 'a -> 'b option;
     bwd: 'b -> 'a option; }
-  
+
+let iso f g =
+  { fwd = f;
+    bwd = g }
+
+let fwd: ('a, 'b) iso -> 'a -> 'b option =
+  fun d0 -> d0.fwd
+let bwd: ('a, 'b) iso -> 'b -> 'a option =
+  fun d0 -> d0.bwd
+
 let identity =
   { fwd = (fun a0 -> Some a0);
     bwd = (fun a0 -> Some a0);
@@ -36,4 +45,19 @@ let compose d0 d1 =
 let inverse d0 =
   { fwd = (fun a0 -> d0.bwd a0);
     bwd = (fun b0 -> d0.fwd b0);
+  }
+
+let commute: ('a * 'b, 'b * 'a) iso =
+  { fwd = (fun (a0, b0) -> Some (b0, a0));
+    bwd = (fun (b0, a0) -> Some (a0, b0))
+  }
+
+let element ?(comparator = Pervasives.(=)) a0 =
+  { fwd = (function () -> Some a0);
+    bwd = (function a1 when comparator a0 a1 -> Some () | _ -> None)
+  }
+
+let subset f =
+  { fwd = (function a0 when f a0 -> Some a0 | _ -> None);
+    bwd = (function a0 when f a0 -> Some a0 | _ -> None);
   }

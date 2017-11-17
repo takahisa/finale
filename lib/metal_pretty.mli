@@ -24,5 +24,4 @@ open Metal_source
 
 include META_SYNTAX
 
-val show: ?at:position -> (unit -> 'a repr) -> ('a -> string option)
-
+val show: (unit -> 'a repr) -> 'a -> string option

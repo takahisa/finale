@@ -30,7 +30,9 @@ module type META_SYNTAX = sig
   val ( <* ): 'a repr -> unit repr -> 'a repr
   val ( *> ): unit repr -> 'a repr -> 'a repr
 
-  val hold: (unit -> 'a repr) -> 'a repr
+  val ( <$ ): 'a repr -> (unit, 'a) iso -> unit repr
+  val ( $> ): 'a repr -> (unit, 'a) iso -> 'a repr
+
   val fail: 'a repr
 
   val rep0: 'a repr -> 'a list repr
@@ -44,4 +46,10 @@ module type META_SYNTAX = sig
 
   val spaces0: unit repr
   val spaces1: unit repr
+  val between: unit repr -> unit repr -> 'a repr -> 'a repr
+
+  val any: char repr
+  val lower: char repr
+  val upper: char repr
+  val digit: char repr
 end

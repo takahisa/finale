@@ -19,6 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include (module type of struct include Metal_metasyntax end)
-module Iso = Metal_iso
-module Source = Metal_source
+module Option : sig
+  type 'a t = 'a option
+  val get: 'a t -> 'a
+  val map: f:('a -> 'b) -> 'a t -> 'b t
+  val concat_map: f:('a -> 'b t) -> 'a t -> 'b t
+  val ( /// ): 'a t -> 'a t -> 'a t
+  val ( *** ): 'a t -> 'a t -> ('a * 'a) t
+end

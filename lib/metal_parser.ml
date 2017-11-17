@@ -20,119 +20,118 @@
  * THE SOFTWARE.
  *)
 open Metal_iso
+open Metal_aux
 open Metal_source
-open Re
-open Re_pcre
 
-type 'a repr =
-  { run: (position * string) -> (position * string * 'a) option }
+type 'a repr = { run: input:string -> (string * 'a) option }
 
 let ( <$> ) d0 p0 =
-  { run = fun (at, s0) ->
-        match p0.run (at, s0) with
-        | Some (at, s1, a0) -> begin
-            match d0.fwd a0 with
-            | Some b0 ->
-              Some (at, s1, b0)
-            | None ->
-              None
+  { run =
+      fun ~input:z0 ->
+        Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, a1) ->
+          Option.concat_map (d0.fwd a1) ~f:begin fun b1 ->
+            Some (z1, b1)
           end
-        | None ->
-          None
+        end
   }
 
 let ( <*> ) p0 p1 =
-  { run = fun (at, s0) ->
-        match p0.run (at, s0) with
-        | Some (at, s1, a0) -> begin
-            match p1.run (at, s1) with
-            | Some (at, s2, a1) ->
-              Some (at, s2, (a0, a1))
-            | None ->
-              None
+  { run =
+      fun ~input:z0 ->
+        Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, a1) ->
+          Option.concat_map (p1.run ~input:z1) ~f:begin fun (z2, a2) ->
+            Some (z2, (a1, a2))
           end
-        | None ->
-          None
+        end
   }
 
 let ( <|> ) p0 p1 =
-  { run = fun (at, s0) ->
-        match p0.run (at, s0) with
-        | Some (at, s1, a0) ->
-          Some (at, s1, a0)
+  { run =
+      fun ~input:z0 ->
+        match p0.run ~input:z0 with
+        | Some (z1, a1) ->
+          Some (z1, a1)
         | None ->
-          p1.run (at, s0)
+          p1.run ~input:z0
   }
 
 let ( <* ) p0 p1 =
-  { run = fun (at, s0) ->
-        match p0.run (at, s0) with
-        | Some (at, s1, a0) -> begin
-            match p1.run (at, s1) with
-            | Some (at, s2, ()) ->
-              Some (at, s2, a0)
-            | None ->
-              None
+  { run =
+      fun ~input:z0 ->
+        Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, a1) ->
+          Option.concat_map (p1.run ~input:z1) ~f:begin fun (z2, _) ->
+            Some (z2, a1)
           end
-        | None ->
-          None
+        end
   }
 
 let ( *> ) p0 p1 =
-  { run = fun (at, s0) ->
-        match p0.run (at, s0) with
-        | Some (at, s1, ()) -> begin
-            match p1.run (at, s1) with
-            | Some (at, s2, a0) ->
-              Some (at, s2, a0)
-            | None ->
-              None
+  { run =
+      fun ~input:z0 ->
+        Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, _) ->
+          Option.concat_map (p1.run ~input:z1) ~f:begin fun (z2, a2) ->
+            Some (z2, a2)
           end
-        | None ->
-          None
+        end
   }
 
-let hold f =
-  let lazy_p = Lazy.from_fun f in
-  { run = fun (at, s0) -> (Lazy.force lazy_p).run (at, s0) }
+let ( <$ ) p0 d0 =
+  { run =
+      fun ~input:z0 ->
+        Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, a1) ->          
+          Option.concat_map (d0.bwd a1) ~f:begin fun () ->
+            Some (z1, ())
+          end
+        end
+  }
+
+let ( $> ) p0 d0 =
+  { run =
+      fun ~input:z0 ->
+        Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, a1) ->          
+          Option.concat_map (d0.bwd a1) ~f:begin fun () ->
+            Some (z1, a1)
+          end
+        end
+  }
 
 let fail =
-  { run = fun _ -> None }
+  { run = fun ~input:z0 -> None }
 
-let rec rep0 p0 acc =
-  { run = fun (at, s0) ->
-        match p0.run (at, s0) with
-        | Some (at, s1, a0) ->
-          (rep0 p0 (a0 :: acc)).run (at, s1)
-        | None ->
-          Some (at, s0, List.rev acc)
+let rec choice = function
+  | h :: t ->
+    h <|> choice t
+  | [] ->
+    fail
+
+let rec rep0 p0 =
+  { run =
+      fun ~input:z0 ->
+        Option.(
+          Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, h) ->
+            Option.concat_map ((rep0 p0).run ~input:z1) ~f:begin fun (z2, t) ->
+              Some (z2, h :: t)
+            end /// Some (z1, [h])
+          end
+        )
   }
-let rep0 p0 = rep0 p0 []
+
 let rep1 p0 =
-  { run = fun (at, s0) ->
-        match (p0 <*> rep0 p0).run (at, s0) with
-        | Some (at, s1, (a0, as0)) ->
-          Some (at, s1, a0 :: as0)
-        | None ->
-          None
+  { run =
+      fun ~input:z0 ->
+        Option.map ((p0 <*> rep0 p0).run ~input:z0) ~f:(fun (z1, (h, t)) -> (z1, h :: t))
   }
 
 let sep1 p0 p1 =
-  { run = fun (at, s0) ->
-        match (p1 <*> (rep0 (p0 *> p1))).run (at, s0) with
-        | Some (at, s1, (a0, as0)) ->
-          Some (at, s1, a0 :: as0)
-        | None ->
-          None
+  { run =
+      fun ~input:z0 ->
+        Option.map ((p1 <*> rep0 (p0 *> p1)).run ~input:z0) ~f:(fun (z1, (h, t)) -> (z1, h :: t))
   }
 
 let sep0 p0 p1 =
-  { run = fun (at, s0) ->
-        match (p1 <*> (rep0 (p0 *> p1))).run (at, s0) with
-        | Some (at, s1, (a0, as0)) ->
-          Some (at, s1, a0 :: as0)
-        | None ->
-          Some (at, s0, [])
+  { run =
+      fun ~input:z0 ->
+        Option.((sep1 p0 p1).run ~input:z0 /// Some (z0, []))
   }
 
 let sep_end0 p0 p1 =
@@ -141,33 +140,31 @@ let sep_end0 p0 p1 =
 let sep_end1 p0 p1 =
   rep1 (p1 <* p0)
 
-let spaces0_re = Re_pcre.regexp "^([\\s\\r\\n]*)(.*)"
-let spaces0 =
-  { run = fun (at, s0) ->
-        match Re.exec_opt spaces0_re s0 with
-        | Some g when Group.test g 1 && Group.test g 2 ->
-          let s0 = Group.get g 1 in
-          let s1 = Group.get g 2 in
-          Some ({ at with column = at.column + String.length s1 }, s1, ignore s0)
-        | _ ->
-          None
-  }
-  
-let spaces1_re = Re_pcre.regexp "^([\\s\\r\\n]+)(.*)"
-let spaces1 =
-  { run = fun (at, s0) ->
-        match Re.exec_opt spaces1_re s0 with
-        | Some g when Group.test g 1 && Group.test g 2 ->
-          let s0 = Group.get g 1 in
-          let s1 = Group.get g 2 in
-          Some ({ at with column = at.column + String.length s1 }, s1, ignore s0)
-        | _ ->
-          None
+let between lp rp p0 =
+  lp *> p0 <* rp
+
+let any: char repr =
+  { run =
+      fun ~input:z0 ->
+        let length = String.length z0 in
+        let z1 = String.sub z0 1 (length-1) in
+        let c1 = String.get z0 0 in
+        Some (z1, c1)
   }
 
-let read ?(at = nowhere) f input =
-  match (f ()).run (at, input) with
-  | Some (_, _, res) ->
-    Some res
-  | None ->
-    None
+let whitespace = choice @@ 
+  List.map (fun c -> any <$ element c) [' '; '\t'; '\r'; '\n']
+let spaces0 = { run = fun ~input:z0 -> Option.map ((rep0 whitespace).run ~input:z0) ~f:(fun (z1, _) -> (z1, ())) }
+let spaces1 = { run = fun ~input:z0 -> Option.map ((rep1 whitespace).run ~input:z0) ~f:(fun (z1, _) -> (z1, ())) }
+
+let lower =
+  subset (fun c -> Char.lowercase_ascii c = c) <$> any
+let upper =
+  subset (fun c -> Char.uppercase_ascii c = c) <$> any
+let digit =
+  let _0 = Char.code '0' in
+  let _9 = Char.code '9' in
+  subset (fun c -> let codepoint = Char.code c in (_0 <= codepoint && codepoint <= _9)) <$> any
+
+let read: (unit -> 'a repr) -> string -> 'a option =
+  fun f -> fun z0 -> Option.map ((f ()).run ~input:z0) ~f:(fun (_, a0) -> a0)

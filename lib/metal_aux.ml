@@ -19,6 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include (module type of struct include Metal_metasyntax end)
-module Iso = Metal_iso
-module Source = Metal_source
+module Option = struct
+  type 'a t = 'a option
+
+  let map: f:('a -> 'b) -> 'a t -> 'b t = fun ~f -> function
+    | Some x0 ->
+      Some (f x0)
+    | None ->
+      None
+
+  let concat_map: f:('a -> 'b t) -> 'a t -> 'b t = fun ~f -> function
+    | Some x0 ->
+      f x0
+    | None ->
+      None
+
+  let get: 'a t -> 'a = function
+    | Some x0 ->
+      x0
+    | None ->
+      raise (Invalid_argument "None")
+
+  let ( /// ): 'a t -> 'a t -> 'a t =
+    fun z0 -> fun z1 ->
+      match z0 with
+      | Some x0 ->
+        Some x0
+      | None ->
+        z1
+
+  let ( *** ): 'a t -> 'a t -> ('a * 'a) t =
+    fun z0 -> fun z1 ->
+      match z0, z1 with
+      | Some x0, Some x1 ->
+        Some (x0, x1)
+      | _ ->
+        None
+end

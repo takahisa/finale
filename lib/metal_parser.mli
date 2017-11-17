@@ -24,4 +24,4 @@ open Metal_source
 
 include META_SYNTAX
 
-val read: ?at:position -> (unit -> 'a repr) -> (string -> 'a option)
+val read: (unit -> 'a repr) -> string -> 'a option
