@@ -143,7 +143,7 @@ let sep_end1 p0 p1 =
 let between lp rp p0 =
   lp *> p0 <* rp
 
-let any: char repr =
+let char: char repr =
   { run =
       fun ~input:z0 ->
         let length = String.length z0 in
@@ -153,18 +153,18 @@ let any: char repr =
   }
 
 let whitespace = choice @@ 
-  List.map (fun c -> any <$ element c) [' '; '\t'; '\r'; '\n']
+  List.map (fun c -> char <$ element c) [' '; '\t'; '\r'; '\n']
 let spaces0 = { run = fun ~input:z0 -> Option.map ((rep0 whitespace).run ~input:z0) ~f:(fun (z1, _) -> (z1, ())) }
 let spaces1 = { run = fun ~input:z0 -> Option.map ((rep1 whitespace).run ~input:z0) ~f:(fun (z1, _) -> (z1, ())) }
 
 let lower =
-  subset (fun c -> Char.lowercase_ascii c = c) <$> any
+  subset (fun c -> Char.lowercase_ascii c = c) <$> char
 let upper =
-  subset (fun c -> Char.uppercase_ascii c = c) <$> any
+  subset (fun c -> Char.uppercase_ascii c = c) <$> char
 let digit =
   let _0 = Char.code '0' in
   let _9 = Char.code '9' in
-  subset (fun c -> let codepoint = Char.code c in (_0 <= codepoint && codepoint <= _9)) <$> any
+  subset (fun c -> let codepoint = Char.code c in (_0 <= codepoint && codepoint <= _9)) <$> char
 
 let read: (unit -> 'a repr) -> string -> 'a option =
   fun f -> fun z0 -> Option.map ((f ()).run ~input:z0) ~f:(fun (_, a0) -> a0)

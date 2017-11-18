@@ -19,8 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include (module type of struct include Metal_metasyntax end)
-module Iso = Metal_iso
-module Source = Metal_source
-module Pretty = Metal_pretty
-module Parser = Metal_parser
+open OUnit2
+open Metal
+open Metal.Iso
+
+let pretty_success r e f =
+  match Pretty.show (fun () -> r) e with
+  | Some x ->
+    f x
+  | None ->
+    assert_failure "printing error"
+      
+let pretty_failure r e =
+  match Pretty.show (fun () -> r) e with
+  | Some r ->
+    assert_failure "printing error"
+  | None ->
+    ()
+
+let _ =
+  run_test_tt_main begin "Pretty" >::: [
+      "char" >:: begin fun _ ->
+        pretty_success Pretty.char 'a' (fun real -> assert_equal real "a");
+      end;
+      "lower" >:: begin fun _ ->
+        pretty_success Pretty.lower 'a' (fun real -> assert_equal real "a");
+        pretty_failure Pretty.lower 'A'
+      end;
+      "upper" >:: begin fun _ ->
+        pretty_success Pretty.upper 'A' (fun real -> assert_equal real "A");
+        pretty_failure Pretty.upper 'a'
+      end;
+      "digit" >:: begin fun _ ->
+        pretty_success Pretty.digit '0' (fun real -> assert_equal real "0");
+        pretty_success Pretty.digit '1' (fun real -> assert_equal real "1");
+        pretty_failure Pretty.digit 'a'
+      end;      
+    ]
+  end

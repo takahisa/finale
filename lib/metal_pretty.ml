@@ -121,7 +121,7 @@ let spaces1 = { run = fun ~input:_ -> Some " " }
 let between lp rp p0 =
   lp *> p0 <* rp
 
-let any =
+let char =
   { run = fun ~input:c -> Some (String.make 1 c) }
 
 let lower =

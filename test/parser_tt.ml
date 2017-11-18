@@ -19,8 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include (module type of struct include Metal_metasyntax end)
-module Iso = Metal_iso
-module Source = Metal_source
-module Pretty = Metal_pretty
-module Parser = Metal_parser
+open OUnit2
+open Metal
+open Metal.Iso
+
+let parse_success r s f =
+  match Parser.read (fun () -> r) s with
+  | Some x ->
+    f x
+  | None ->
+    assert_failure "parse error"
+      
+let parse_failure r s =
+  match Parser.read (fun () -> r) s with
+  | Some r ->
+    assert_failure "parse error"
+  | None ->
+    ()
+
+let _ =
+  run_test_tt_main begin "Parser" >::: [
+      "char" >:: begin fun _ ->
+        parse_success Parser.char "a" (fun real -> assert_equal real 'a');
+        parse_success Parser.char "ab" (fun real -> assert_equal real 'a');
+      end;
+      "lower" >:: begin fun _ ->
+        parse_success Parser.lower "a" (fun real -> assert_equal real 'a');
+        parse_failure Parser.lower "A"
+      end;
+      "upper" >:: begin fun _ ->
+        parse_success Parser.upper "A" (fun real -> assert_equal real 'A');
+        parse_failure Parser.upper "a"
+      end;
+      "digit" >:: begin fun _ ->
+        parse_success Parser.digit "0" (fun real -> assert_equal real '0');
+        parse_success Parser.digit "1" (fun real -> assert_equal real '1');
+        parse_failure Parser.digit "a"
+      end;      
+    ]
+  end
