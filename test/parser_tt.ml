@@ -23,38 +23,64 @@ open OUnit2
 open Metal
 open Metal.Iso
 
-let parse_success r s f =
+let success r s f =
   match Parser.read (fun () -> r) s with
   | Some x ->
     f x
   | None ->
-    assert_failure "parse error"
+    assert_failure ""
       
-let parse_failure r s =
+let failure r s =
   match Parser.read (fun () -> r) s with
   | Some r ->
-    assert_failure "parse error"
+    assert_failure ""
   | None ->
     ()
+
+type 'a exp = Base of 'a | Binop of 'a exp * 'a exp
+let base_iso =
+  { fwd = (function x0 -> Some (Base x0));
+    bwd = (function Base x0 -> Some x0 | _ -> None)
+  }
+let binop_iso =
+  { fwd = (function (e0, e1) -> Some (Binop (e0, e1)));
+    bwd = (function Binop (e0, e1) -> Some (e0, e1) | _ -> None)
+  }
 
 let _ =
   run_test_tt_main begin "Parser" >::: [
       "char" >:: begin fun _ ->
-        parse_success Parser.char "a" (fun real -> assert_equal real 'a');
-        parse_success Parser.char "ab" (fun real -> assert_equal real 'a');
+        success Parser.char "a" (fun real -> assert_equal real 'a');
+        success Parser.char "ab" (fun real -> assert_equal real 'a');
       end;
       "lower" >:: begin fun _ ->
-        parse_success Parser.lower "a" (fun real -> assert_equal real 'a');
-        parse_failure Parser.lower "A"
+        success Parser.lower "a" (fun real -> assert_equal real 'a');
+        failure Parser.lower "A"
       end;
       "upper" >:: begin fun _ ->
-        parse_success Parser.upper "A" (fun real -> assert_equal real 'A');
-        parse_failure Parser.upper "a"
+        success Parser.upper "A" (fun real -> assert_equal real 'A');
+        failure Parser.upper "a"
       end;
       "digit" >:: begin fun _ ->
-        parse_success Parser.digit "0" (fun real -> assert_equal real '0');
-        parse_success Parser.digit "1" (fun real -> assert_equal real '1');
-        parse_failure Parser.digit "a"
-      end;      
+        success Parser.digit "0" (fun real -> assert_equal real '0');
+        success Parser.digit "1" (fun real -> assert_equal real '1');
+        failure Parser.digit "a"
+      end;
+      "chainl1" >:: begin fun _ ->
+        success Parser.(chainl1 binop_iso (char <$ element '+') (base_iso <$> char)) "1+2+3"
+          (fun real -> assert_equal real (Binop (Binop (Base '1', Base '2'), Base '3')));
+        success Parser.(chainl1 binop_iso (char <$ element '+') (base_iso <$> char)) "1"
+          (fun real -> assert_equal real (Base '1'));
+        success Parser.(chainl1 binop_iso (char <$ element '+') (base_iso <$> char)) "1-2-3"
+          (fun real -> assert_equal real (Base '1'));
+      end;
+      "chainr1" >:: begin fun _ ->
+        success Parser.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) "1+2+3"
+          (fun real -> assert_equal real (Binop (Base '1', Binop (Base '2', Base '3'))));
+        success Parser.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) "1"
+          (fun real -> assert_equal real (Base '1'));
+        success Parser.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) "1-2-3"
+          (fun real -> assert_equal real (Base '1'));
+      end
     ]
   end

@@ -115,6 +115,26 @@ let sep_end p0 p1 =
 let sep_end0 p0 p1 = { run = fun ~input:as0 -> sep_end p0 p1 as0 }
 let sep_end1 p0 p1 = { run = fun ~input:as0 -> sep_end p0 p1 as0 }
 
+let rec chainl1 d0 p0 p1 =
+  { run =
+      fun ~input:a0 ->
+        Option.concat_map (d0.bwd a0) ~f:(fun (a1, a2) ->
+          Option.concat_map (p1.run ~input:a1) ~f:(fun z0 ->
+            Option.concat_map (p0.run ~input:()) ~f:(fun z1 ->
+              Option.concat_map ((chainl1 d0 p0 p1 <|> p1).run ~input:a2) ~f:(fun z2 ->
+                Some (z0 ^ z1 ^ z2)))))
+  }
+
+let rec chainr1 d0 p0 p1 =
+  { run =
+      fun ~input:a0 ->
+        Option.concat_map (d0.bwd a0) ~f:(fun (a1, a2) ->
+          Option.concat_map (p1.run ~input:a2) ~f:(fun z0 ->
+            Option.concat_map (p0.run ~input:()) ~f:(fun z1 ->
+              Option.concat_map ((chainr1 d0 p0 p1 <|> p1).run ~input:a1) ~f:(fun z2 ->
+                Some (z2 ^ z1 ^ z0)))))
+  }
+
 let spaces0 = { run = fun ~input:_ -> Some " " }
 let spaces1 = { run = fun ~input:_ -> Some " " }
 

@@ -49,6 +49,9 @@ module type META_SYNTAX = sig
   val spaces1: unit repr
   val between: unit repr -> unit repr -> 'a repr -> 'a repr
 
+  val chainl1: ('a * 'a, 'a) iso -> unit repr -> 'a repr -> 'a repr
+  val chainr1: ('a * 'a, 'a) iso -> unit repr -> 'a repr -> 'a repr
+
   val char: char repr
   val lower: char repr
   val upper: char repr

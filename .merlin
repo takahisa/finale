@@ -1,0 +1,7 @@
+S src/
+B src/
+S lib/
+B lib/
+S test
+PKG ounit
+PKG re re.pcre

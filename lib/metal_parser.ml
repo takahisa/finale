@@ -140,6 +140,44 @@ let sep_end0 p0 p1 =
 let sep_end1 p0 p1 =
   rep1 (p1 <* p0)
 
+let rec chainl1 d0 p0 p1 =
+  { run =
+      fun ~input:z0 ->
+        let open Option in
+        concat_map (p1.run ~input:z0) ~f:begin fun (z1, a1) ->
+          (chainl1_rest d0 p0 p1 a1).run ~input:z1
+        end
+  }
+and chainl1_rest d0 p0 p1 a0 =
+  { run =
+      fun ~input:z0 ->
+        let open Option in
+        concat_map ((p0 *> p1).run ~input:z0) ~f:begin fun (z1, a1) ->
+          concat_map (d0.fwd (a0, a1)) ~f:begin fun a2 ->
+            (chainl1_rest d0 p0 p1 a2).run ~input:z1
+          end
+        end /// (Some (z0, a0))
+  }
+  
+let rec chainr1 d0 p0 p1 =
+  { run =
+      fun ~input:z0 ->
+        let open Option in
+        concat_map (p1.run ~input:z0) ~f:begin fun (z1, a1) ->
+          (chainr1_rest d0 p0 p1 a1).run ~input:z1
+        end
+  }
+and chainr1_rest d0 p0 p1 a0 =
+  { run =
+      fun ~input:z0 ->
+        let open Option in
+        concat_map ((p0 *> chainr1 d0 p0 p1).run ~input:z0) ~f:begin fun (z1, a1) ->
+          concat_map (d0.fwd (a0, a1)) ~f:begin fun a2 ->
+            Some (z1, a2)
+          end
+        end /// (Some (z0, a0))
+    }
+
 let between lp rp p0 =
   lp *> p0 <* rp
 
@@ -147,9 +185,12 @@ let char: char repr =
   { run =
       fun ~input:z0 ->
         let length = String.length z0 in
-        let z1 = String.sub z0 1 (length-1) in
-        let c1 = String.get z0 0 in
-        Some (z1, c1)
+        if (length > 0) then
+          let z1 = String.sub z0 1 (length-1) in
+          let c1 = String.get z0 0 in
+          Some (z1, c1)
+        else
+          None
   }
 
 let whitespace = choice @@ 
