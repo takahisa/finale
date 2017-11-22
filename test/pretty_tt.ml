@@ -23,37 +23,58 @@ open OUnit2
 open Metal
 open Metal.Iso
 
-let pretty_success r e f =
+let success r e f =
   match Pretty.show (fun () -> r) e with
   | Some x ->
     f x
   | None ->
-    assert_failure "printing error"
+    assert_failure ""
       
-let pretty_failure r e =
+let failure r e =
   match Pretty.show (fun () -> r) e with
   | Some r ->
-    assert_failure "printing error"
+    assert_failure ""
   | None ->
     ()
+
+type 'a exp = Base of 'a | Binop of 'a exp * 'a exp
+let base_iso =
+  { fwd = (function x0 -> Some (Base x0));
+    bwd = (function Base x0 -> Some x0 | _ -> None)
+  }
+let binop_iso =
+  { fwd = (function (e0, e1) -> Some (Binop (e0, e1)));
+    bwd = (function Binop (e0, e1) -> Some (e0, e1) | _ -> None)
+  }
+
 
 let _ =
   run_test_tt_main begin "Pretty" >::: [
       "char" >:: begin fun _ ->
-        pretty_success Pretty.char 'a' (fun real -> assert_equal real "a");
+        success Pretty.char 'a' (fun real -> assert_equal real "a");
       end;
       "lower" >:: begin fun _ ->
-        pretty_success Pretty.lower 'a' (fun real -> assert_equal real "a");
-        pretty_failure Pretty.lower 'A'
+        success Pretty.lower 'a' (fun real -> assert_equal real "a");
+        failure Pretty.lower 'A'
       end;
       "upper" >:: begin fun _ ->
-        pretty_success Pretty.upper 'A' (fun real -> assert_equal real "A");
-        pretty_failure Pretty.upper 'a'
+        success Pretty.upper 'A' (fun real -> assert_equal real "A");
+        failure Pretty.upper 'a'
       end;
       "digit" >:: begin fun _ ->
-        pretty_success Pretty.digit '0' (fun real -> assert_equal real "0");
-        pretty_success Pretty.digit '1' (fun real -> assert_equal real "1");
-        pretty_failure Pretty.digit 'a'
-      end;      
+        success Pretty.digit '0' (fun real -> assert_equal real "0");
+        success Pretty.digit '1' (fun real -> assert_equal real "1");
+        failure Pretty.digit 'a'
+      end;
+      "chainl1" >:: begin fun _ ->
+        success Pretty.(chainl1 binop_iso (char <$ element '+') (base_iso <$> char)) (Binop (Binop (Base '1', Base '2'), Base '3'))
+          (fun real -> assert_equal real "1+2+3");
+        failure Pretty.(chainl1 binop_iso (char <$ element '+') (base_iso <$> char)) (Binop (Base '1', Binop (Base '2', Base '3')))
+      end;
+      "chainr1" >:: begin fun _ ->
+        success Pretty.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) (Binop (Base '1', Binop (Base '2', Base '3')))
+          (fun real -> assert_equal real "1+2+3");
+        failure Pretty.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) (Binop (Binop (Base '1', Base '2'), Base '3'))
+      end
     ]
   end
