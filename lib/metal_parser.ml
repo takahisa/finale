@@ -115,8 +115,8 @@ let rec rep0 p0 =
           Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, h) ->
             Option.concat_map ((rep0 p0).run ~input:z1) ~f:begin fun (z2, t) ->
               Some (z2, h :: t)
-            end /// Some (z1, [h])
-          end
+            end
+          end /// Some (z0, [])
         )
   }
 
