@@ -95,6 +95,10 @@ let ( $> ) p0 d0 =
         end
   }
 
+let hold f =
+  let p = Lazy.from_fun f in
+  { run = fun ~input:z0 -> (Lazy.force p).run ~input:z0 }
+
 let fail =
   { run = fun ~input:z0 -> None }
 

@@ -45,7 +45,7 @@ let ( <|> ) p0 p1 =
         | Some z0 ->
           Some z0
         | None ->
-          p0.run ~input:a0
+          p1.run ~input:a0
   }
 
 let ( <* ) p0 p1 =
@@ -79,6 +79,10 @@ let ( $> ) p0 d0 =
       fun ~input:a0 ->
         Option.concat_map (d0.bwd a0) ~f:(fun () -> p0.run ~input:a0)
   }
+
+let hold f =
+  let p = Lazy.from_fun f in
+  { run = fun ~input:a0 -> (Lazy.force p).run ~input:a0 }
 
 let fail =
   { run = fun ~input:_ -> None }
@@ -160,8 +164,7 @@ let upper =
 let digit =
   let _0 = Char.code '0' in
   let _9 = Char.code '9' in
-  subset (fun c -> let n = Char.code c in (_0 <= n && n <= _9)) <$>
-    { run = fun ~input:c -> Some (String.make 1 c) }
+  subset (fun c -> let n = Char.code c in (_0 <= n && n <= _9)) <$> char
 
 let show: (unit -> 'a repr) -> 'a -> string option =
   fun f -> fun a0 -> (f ()).run ~input:a0

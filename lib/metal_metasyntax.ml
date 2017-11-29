@@ -34,6 +34,7 @@ module type META_SYNTAX = sig
   val ( <$ ): 'a repr -> (unit, 'a) iso -> unit repr
   val ( $> ): 'a repr -> (unit, 'a) iso -> 'a repr
 
+  val hold: (unit -> 'a repr) -> 'a repr
   val fail: 'a repr
 
   val rep0: 'a repr -> 'a list repr
