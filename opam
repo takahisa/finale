@@ -16,12 +16,10 @@ homepage: ""
 dev-repo: "http://github.com/takahisa/metal"
 bug-reports: "http://github.com/takahisa/metal/issues"
 doc: ""
-build: [
-  [ "omake" "build" ]
-]
-build-test: [
-  [ "omake" "test"]
-]
+build:      [[ "omake" "build" ]]
+build-test: [[ "omake" "test"]]
+install:    [[ "omake" "install"]]
+remove:     [[ "omake" "remove"]]
 depends: [
   "omake"          {build & >= "0.10.2"}
   "ounit"          {test  & >= "2.0.0" }  
