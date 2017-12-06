@@ -1,0 +1,7 @@
+version = "0.1.0-SNAPSHOT"
+description = "metal - invertible syntax for ML"
+requires = ""
+archive(byte) = "metal.cma"
+archive(byte, plugin) = "metal.cma"
+archive(native) = "metal.cmxa"
+exists_if = "metal.cma"

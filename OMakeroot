@@ -23,6 +23,11 @@ open build/OCaml
 open build/LaTeX
 
 DefineCommandVars()
+
+if $(not $(defined-env VERBOSE))
+   OMakeFlags(-s --progress)
+   export
+
 .PHONY: clean
 .SUBDIRS: .
 

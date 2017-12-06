@@ -19,8 +19,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-.PHONY: clean
+.PHONY: install remove build clean
 .SUBDIRS: src lib test
+
+install: build
+	private. =
+		FILES[] =
+		FILES += $(fullname $(ls $"lib/metal.cma"))
+		FILES += $(fullname $(ls $"lib/metal.cmxa"))
+		ocamlfind install metal META $(FILES)
+
+remove:
+	ocamlfind remove metal
 
 clean:
     $(RM) .omakedb .omakedb.lock *.omc *~
