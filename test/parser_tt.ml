@@ -81,6 +81,16 @@ let _ =
           (fun real -> assert_equal real (Base '1'));
         success Parser.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) "1-2-3"
           (fun real -> assert_equal real (Base '1'));
+      end;
+      "count" >:: begin fun _ ->
+        success Parser.(count 0 char) "abcdef"
+          (fun real -> assert_equal real []);
+        success Parser.(count 1 char) "abcdef"
+          (fun real -> assert_equal real ['a']);
+        success Parser.(count 3 char) "abcdef"
+          (fun real -> assert_equal real ['a'; 'b'; 'c']);
+        failure Parser.(count 7 char) "abcdef";
+        assert_raises (Invalid_argument "count") (fun () -> Parser.(read (fun () -> count (-1) char) "abcdef"))
       end
     ]
   end

@@ -75,6 +75,15 @@ let _ =
         success Pretty.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) (Binop (Base '1', Binop (Base '2', Base '3')))
           (fun real -> assert_equal real "1+2+3");
         failure Pretty.(chainr1 binop_iso (char <$ element '+') (base_iso <$> char)) (Binop (Binop (Base '1', Base '2'), Base '3'))
+      end;
+      "count" >:: begin fun _ ->
+        success Pretty.(count 0 char) []
+          (fun real -> assert_equal real "");
+        success Pretty.(count 3 char) ['a'; 'b'; 'c']
+          (fun real -> assert_equal real "abc");
+        failure Pretty.(count 2 char) ['a'; 'b'; 'c'];
+        failure Pretty.(count 4 char) ['a'; 'b'; 'c'];
+        assert_raises (Invalid_argument "count") (fun () -> Pretty.(show (fun () -> count (-1) char) ['a'; 'b'; 'c']));
       end
     ]
   end

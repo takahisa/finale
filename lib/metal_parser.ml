@@ -108,6 +108,21 @@ let rec choice = function
   | [] ->
     fail
 
+let rec count n0 p0 =
+  { run =
+      fun ~input:z0 ->
+        if n0 > 0 then
+          Option.concat_map (p0.run ~input:z0) ~f:begin fun (z1, h) ->
+            Option.concat_map ((count (n0-1) p0).run ~input:z1) ~f:begin fun (z2, t) ->
+              Some (z2, h :: t)
+            end
+          end
+        else if n0 = 0 then
+          Some (z0, [])
+        else
+          raise (Invalid_argument "count")
+  }
+
 let rec rep0 p0 =
   { run =
       fun ~input:z0 ->

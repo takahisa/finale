@@ -97,6 +97,24 @@ let rec rep p = function
       end
     end
 
+let rec count n0 p0 =
+  { run =
+      fun ~input:list ->
+        if (n0 < 0) then
+          raise (Invalid_argument "count");
+        match list with
+        | h :: t when (n0 > 0) ->
+          Option.concat_map (p0.run ~input:h) ~f:begin fun z0 ->
+            Option.concat_map ((count (n0-1) p0).run ~input:t) ~f:begin fun z1 ->
+              Some (z0 ^ z1)
+            end
+          end
+        | [] when n0 = 0 ->
+          Some ""
+        | _ ->
+          None
+  }
+
 let rep0 p0 = { run = fun ~input:as0 -> rep p0 as0 }
 let rep1 p0 = { run = fun ~input:as0 -> rep p0 as0 }
 
