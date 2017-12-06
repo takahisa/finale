@@ -28,7 +28,7 @@ or build with OMake.
 
 ## Example
 
-A parser/printer implementation of expressions that consist of integer literal, `+` and `-` can be write as follows.
+A parser and printer implementation for the arithmetic expression can be written as follows.
 
 ```ocaml
 open Metal
