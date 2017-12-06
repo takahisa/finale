@@ -61,3 +61,27 @@ let subset f =
   { fwd = (function a0 when f a0 -> Some a0 | _ -> None);
     bwd = (function a0 when f a0 -> Some a0 | _ -> None);
   }
+
+let list =
+  { fwd = (function (hl, tl) -> Some (hl :: tl));
+    bwd = (function (hl :: tl) -> Some (hl, tl) | _ -> None);
+  }
+
+let implode = fun cs ->
+  String.concat "" @@ List.map (fun c -> String.make 1 c) cs
+
+let explode = fun z ->
+  let n = String.length z in
+  let rec go j =
+    if j < n then String.get z j :: go (j+1) else []
+  in go 0
+
+let string =
+  { fwd = (function a -> Some (implode a));
+    bwd = (function b -> Some (explode b))
+  }
+
+let number =
+  { fwd = (function a -> try Some (int_of_string a) with _ -> None);
+    bwd = (function b -> try Some (string_of_int b) with _ -> None)
+  }

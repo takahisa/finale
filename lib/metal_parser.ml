@@ -101,6 +101,9 @@ let hold f =
 let fail =
   { run = fun ~input:z0 -> None }
 
+let succeed =
+  { run = fun ~input:z0 -> Some (z0, ()) }
+
 let rec choice = function
   | h :: t ->
     h <|> choice t

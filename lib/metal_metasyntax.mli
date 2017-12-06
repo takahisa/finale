@@ -35,6 +35,7 @@ module type META_SYNTAX = sig
 
   val hold: (unit -> 'a repr) -> 'a repr
   val fail: 'a repr
+  val succeed: unit repr
 
   val count: int -> 'a repr -> 'a list repr
   val rep0: 'a repr -> 'a list repr

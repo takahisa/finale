@@ -86,6 +86,9 @@ let hold f =
 let fail =
   { run = fun ~input:_ -> None }
 
+let succeed =
+  { run = fun ~input:_ -> Some "" }
+
 let rec rep p = function
   | [] ->
     Some ""
