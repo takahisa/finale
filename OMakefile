@@ -25,9 +25,13 @@
 install: build
 	section
 		FILES[] =
-		FILES += $(fullname $(ls $"lib/metal.cma"))
-		FILES += $(fullname $(ls $"lib/metal.cmxa"))
-		FILES += $(fullname $(ls $"lib/metal.a"))
+		FILES += $(fullname $(ls $"lib/*.cmx"))
+		FILES += $(fullname $(ls $"lib/*.cmxa"))
+		FILES += $(fullname $(ls $"lib/*.cmi"))
+		FILES += $(fullname $(ls $"lib/*.cmo"))
+		FILES += $(fullname $(ls $"lib/*.cma"))
+		FILES += $(fullname $(ls $"lib/*.annot"))
+		FILES += $(fullname $(ls $"lib/*.a"))
 		ocamlfind install metal META $(FILES)
 
 remove:
