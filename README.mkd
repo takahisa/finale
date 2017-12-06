@@ -11,6 +11,7 @@ metal is an invertible-syntax library for OCaml.
 
 ## Installation
 
+Install with OPAM.
 ```
   git clone http://github.com/takahisa/metal.git metal
   opam pin add metal ./metal
@@ -23,6 +24,64 @@ or build with OMake.
   cd metal
   metal build
   metal install
+```
+
+## Example
+
+A parser/printer implementation of expressions that consist of integer literal, `+` and `-` can be write as follows.
+
+```ocaml
+open Metal
+open Metal.Iso
+
+type 'a exp =
+  | Int: int -> int exp
+  | Add: (int exp * int exp) -> int exp
+  | Sub: (int exp * int exp) -> int exp
+  | Mul: (int exp * int exp) -> int exp
+  | Div: (int exp * int exp) -> int exp
+
+let intE =
+  { fwd = (function n -> Some (Int n));
+    bwd = (function (Int n) -> Some n | _ -> None)
+  }
+
+let addE =
+  { fwd = (function (e0, e1) -> Some (Add (e0, e1)));
+    bwd = (function (Add (e0, e1)) -> Some (e0, e1) | _ -> None)
+  }
+
+let subE =
+  { fwd = (function (e0, e1) -> Some (Sub (e0, e1)));
+    bwd = (function (Sub (e0, e1)) -> Some (e0, e1) | _ -> None)
+  }
+
+let mulE =
+  { fwd = (function (e0, e1) -> Some (Mul (e0, e1)));
+    bwd = (function (Mul (e0, e1)) -> Some (e0, e1) | _ -> None)
+  }
+
+let divE =
+  { fwd = (function (e0, e1) -> Some (Div (e0, e1)));
+    bwd = (function (Div (e0, e1)) -> Some (e0, e1) | _ -> None)
+  }
+
+module Syntax (M: META_SYNTAX) = struct
+  open M
+  let lp = char <$ element '('
+  let rp = char <$ element ')'
+
+  let rec exp () =
+    (addE <$> (lp *> ((hold exp) <*> (char <$ element '+') *> (hold exp)) <* rp)) <|>
+    (subE <$> (lp *> ((hold exp) <*> (char <$ element '-') *> (hold exp)) <* rp)) <|>
+    (mulE <$> (lp *> ((hold exp) <*> (char <$ element '*') *> (hold exp)) <* rp)) <|>
+    (divE <$> (lp *> ((hold exp) <*> (char <$ element '/') *> (hold exp)) <* rp)) <|>
+    ((compose string (compose number intE)) <$> rep1 digit)
+  let exp = exp ()
+end
+
+let _ = Parser.read (fun () -> let module M = Syntax(Parser) in M.exp) "((1+2)-3)"
+let _ = Pretty.show (fun () -> let module M = Syntax(Pretty) in M.exp) (Sub (Add (Int 1, Int 2), Int 3))
 ```
 
 ## License
