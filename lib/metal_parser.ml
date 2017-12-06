@@ -202,14 +202,29 @@ let whitespace = choice @@
 let spaces0 = { run = fun ~input:z0 -> Option.map ((rep0 whitespace).run ~input:z0) ~f:(fun (z1, _) -> (z1, ())) }
 let spaces1 = { run = fun ~input:z0 -> Option.map ((rep1 whitespace).run ~input:z0) ~f:(fun (z1, _) -> (z1, ())) }
 
+let _a = Char.code 'a'
+let _z = Char.code 'z'
 let lower =
-  subset (fun c -> Char.lowercase_ascii c = c) <$> char
+  subset begin fun c -> 
+    let code = Char.code c in
+    _a <= code && code <= _z
+  end <$> char
+
+let _A = Char.code 'A'
+let _Z = Char.code 'Z'
 let upper =
-  subset (fun c -> Char.uppercase_ascii c = c) <$> char
+  subset begin fun c -> 
+    let code = Char.code c in
+    _A <= code && code <= _Z
+  end <$> char
+
+let _0 = Char.code '0'
+let _9 = Char.code '9'
 let digit =
-  let _0 = Char.code '0' in
-  let _9 = Char.code '9' in
-  subset (fun c -> let codepoint = Char.code c in (_0 <= codepoint && codepoint <= _9)) <$> char
+  subset begin fun c ->
+    let code = Char.code c in
+    _0 <= code && code <= _9
+  end <$> char
 
 let read: (unit -> 'a repr) -> string -> 'a option =
   fun f -> fun z0 -> Option.map ((f ()).run ~input:z0) ~f:(fun (_, a0) -> a0)
