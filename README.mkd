@@ -22,8 +22,8 @@ or build with OMake.
 ```
   git clone http://github.com/takahisa/metal.git metal
   cd metal
-  metal build
-  metal install
+  omake build
+  omake install
 ```
 
 ## Example
