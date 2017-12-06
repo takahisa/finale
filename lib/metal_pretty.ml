@@ -21,7 +21,6 @@
  *)
 open Metal_iso
 open Metal_aux
-open Metal_source
 
 type 'a repr = { run: input:'a -> string option }
 

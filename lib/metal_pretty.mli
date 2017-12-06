@@ -19,9 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-open Metal_metasyntax
-open Metal_source
-
-include META_SYNTAX
+include Metal_metasyntax.META_SYNTAX
 
 val show: (unit -> 'a repr) -> 'a -> string option

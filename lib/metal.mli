@@ -21,6 +21,5 @@
  *)
 include (module type of struct include Metal_metasyntax end)
 module Iso = Metal_iso
-module Source = Metal_source
 module Pretty = Metal_pretty
 module Parser = Metal_parser
