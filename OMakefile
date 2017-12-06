@@ -23,10 +23,11 @@
 .SUBDIRS: src lib test
 
 install: build
-	private. =
+	section
 		FILES[] =
 		FILES += $(fullname $(ls $"lib/metal.cma"))
 		FILES += $(fullname $(ls $"lib/metal.cmxa"))
+		FILES += $(fullname $(ls $"lib/metal.a"))
 		ocamlfind install metal META $(FILES)
 
 remove:
