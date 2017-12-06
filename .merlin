@@ -1,5 +1,3 @@
-S src/
-B src/
 S lib/
 B lib/
 S test

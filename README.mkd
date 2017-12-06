@@ -9,13 +9,20 @@ metal is an invertible-syntax library for OCaml.
 - ocaml >= 4.04
 - re >= 1.7.1
 
-## How to build
+## Installation
 
-Install [OPAM](https://opam.ocaml.org/) into your system, and run the following commands.
 ```
-  opam install omake re
   git clone http://github.com/takahisa/metal.git metal
-  cd metal && omake
+  opam pin add metal ./metal
+  opam install metal
+```
+or build with OMake.
+
+```
+  git clone http://github.com/takahisa/metal.git metal
+  cd metal
+  metal build
+  metal install
 ```
 
 ## License
