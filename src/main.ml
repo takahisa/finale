@@ -20,7 +20,6 @@
  * THE SOFTWARE.
  *)
 open Metal
-open Metal.Source
 
 let _ =
-  error "not implemented"
+  failwith "not implemented"

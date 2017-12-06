@@ -35,3 +35,6 @@ val commute: ('a * 'b, 'b * 'a) iso
 val element: ?comparator:('a -> 'a -> bool) -> 'a -> (unit, 'a) iso
 val subset: ('a -> bool) -> ('a, 'a) iso
 
+val list: ('a * 'a list, 'a list) iso
+val string: (char list, string) iso
+val number: (string, int) iso
