@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 #
 .PHONY: install remove build clean
-.SUBDIRS: src lib test
+.SUBDIRS: lib lib-test
 
 install: build
 	section
