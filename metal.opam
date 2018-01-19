@@ -22,5 +22,6 @@ install:    [[ "omake" "install"]]
 remove:     [[ "omake" "remove"]]
 depends: [
   "omake"          {build & >= "0.10.2"}
-  "ounit"          {test  & >= "2.0.0" }  
+  "ounit"          {test  & >= "2.0.0" }
+  "re"             {build & >= "1.7.1" }
 ]

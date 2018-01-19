@@ -1,6 +1,6 @@
 version = "0.1.0-SNAPSHOT"
 description = "metal - invertible syntax for ML"
-requires = ""
+requires = "re re_pcre"
 archive(byte) = "metal.cma"
 archive(byte, plugin) = "metal.cma"
 archive(native) = "metal.cmxa"
