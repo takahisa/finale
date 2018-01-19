@@ -50,6 +50,13 @@ let binop_iso =
 
 let _ =
   run_test_tt_main begin "Pretty" >::: [
+      "text" >:: begin fun _ ->
+        success (Pretty.text "abc") "abc" (fun real -> assert_equal real "abc");
+        success (Pretty.text "abc") "abcdef" (fun real -> assert_equal real "abc");
+        failure (Pretty.text "abc") "";
+        failure (Pretty.text "abc") "def";
+        success Pretty.(text "abc" <*> text "def") ("abc", "def") (fun real -> assert_equal real "abcdef");
+      end;
       "char" >:: begin fun _ ->
         success Pretty.char 'a' (fun real -> assert_equal real "a");
       end;

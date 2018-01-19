@@ -47,8 +47,16 @@ let binop_iso =
     bwd = (function Binop (e0, e1) -> Some (e0, e1) | _ -> None)
   }
 
+external identity: ('a -> 'a) = "%identity"
+
 let _ =
   run_test_tt_main begin "Parser" >::: [
+      "text" >:: begin fun _ ->
+        success (Parser.text "abc") "abc" (fun real -> assert_equal real "abc");
+        success (Parser.text "abc") "abcdef" (fun real -> assert_equal real "abc");
+        success Parser.(text "abc" <*> text "def") "abcdefg" (fun real -> assert_equal real ("abc", "def"));
+        failure (Parser.text "abc") "";
+      end;
       "char" >:: begin fun _ ->
         success Parser.char "a" (fun real -> assert_equal real 'a');
         success Parser.char "ab" (fun real -> assert_equal real 'a');
@@ -91,6 +99,6 @@ let _ =
           (fun real -> assert_equal real ['a'; 'b'; 'c']);
         failure Parser.(count 7 char) "abcdef";
         assert_raises (Invalid_argument "count") (fun () -> Parser.(read (fun () -> count (-1) char) "abcdef"))
-      end
+      end;
     ]
   end

@@ -172,6 +172,17 @@ let spaces1 = { run = fun ~input:_ -> Some " " }
 let between lp rp p0 =
   lp *> p0 <* rp
 
+let text: string -> string repr = fun z0 ->
+  { run =
+      fun ~input:z1 ->
+        let n0 = String.length z0 in
+        let n1 = String.length z1 in
+        if n1 >= n0 && String.sub z1 0 n0 = z0 then
+          Some z0
+        else
+          None
+  }
+
 let char =
   { run = fun ~input:c -> Some (String.make 1 c) }
 

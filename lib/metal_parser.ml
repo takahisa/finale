@@ -202,6 +202,17 @@ and chainr1_rest d0 p0 p1 a0 =
 let between lp rp p0 =
   lp *> p0 <* rp
 
+let text: string -> string repr = fun z0 ->
+  { run =
+      fun ~input:z1 ->
+        let n0 = String.length z0 in
+        let n1 = String.length z1 in
+        if n1 >= n0 && String.sub z1 0 n0 = z0 then
+          Some (String.sub z1 n0 (n1 - n0), z0)
+        else
+          None
+  }
+        
 let char: char repr =
   { run =
       fun ~input:z0 ->
