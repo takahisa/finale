@@ -20,8 +20,9 @@
  * THE SOFTWARE.
  *)
 open OUnit2
-open Metal
-open Metal.Iso
+open Fractale
+open Fractale.SYM
+open Fractale.Iso
 
 type 'a exp =
   | Int: int -> int exp

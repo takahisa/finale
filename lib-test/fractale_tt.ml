@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include (module type of struct include Metal_metasyntax end)
-module Iso = Metal_iso
-module Pretty = Metal_pretty
-module Parser = Metal_parser
+open! Parser_tt
+open! Pretty_tt
+open! Operator_precedence_tt

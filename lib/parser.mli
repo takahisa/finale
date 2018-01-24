@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include Metal_metasyntax.META_SYNTAX
+
+include SYM.META_SYNTAX
 
 val read: (unit -> 'a repr) -> string -> 'a option

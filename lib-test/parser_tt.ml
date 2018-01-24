@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  *)
 open OUnit2
-open Metal
-open Metal.Iso
+open Fractale
+open Fractale.Iso
 
 let success r s f =
   match Parser.read (fun () -> r) s with

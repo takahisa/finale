@@ -20,8 +20,8 @@
  * THE SOFTWARE.
  *)
 open OUnit2
-open Metal
-open Metal.Iso
+open Fractale
+open Fractale.Iso
 
 let success r e f =
   match Pretty.show (fun () -> r) e with

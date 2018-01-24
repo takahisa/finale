@@ -1,0 +1,28 @@
+opam-version: "1.2"
+version: "0.1.0-SNAPSHOT"
+maintainer: "Takahisa Watanabe <linerlock@outlook.com>"
+authors: ["Takahisa Watanabe <linerlock@outlook.com"]
+available: [
+  ocaml-version >= "4.04.0"
+]
+tags: [
+  "parser-combinator"
+  "parser"
+  "pretty-printer"
+  "invertible-syntax"
+]
+license: "MIT"
+homepage: ""
+dev-repo: "http://github.com/takahisa/fractale"
+bug-reports: "http://github.com/takahisa/fractale/issues"
+doc: ""
+build:      [[ "jbuilder" "build"   "-p" name "-j" jobs]]
+build-test: [[ "jbuilder" "runtest" "-p" name "-j" jobs]]
+install:    [[ "jbuilder" "install"]]
+remove:     [[ "jbuilder" "clean"]]
+depends: [
+  "jbuilder"       {build}
+  "opam-installer" {build}
+  "re"             {build & >= "1.7.1" }
+  "ounit"          {test  & >= "2.0.0" }
+]

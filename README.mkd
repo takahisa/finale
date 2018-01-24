@@ -1,29 +1,21 @@
-metal
+Fractale - An invertible-syntax library for OCaml
 ====
-
-metal is an invertible-syntax library for OCaml.
-
-## Requirements
-
-- omake >= 0.10.0
-- ocaml >= 4.04
-- re >= 1.7.1
 
 ## Installation
 
 Install with OPAM.
 ```
-  git clone http://github.com/takahisa/metal.git metal
-  opam pin add metal ./metal
-  opam install metal
+  git clone http://github.com/takahisa/fractale.git fractale
+  opam pin add fractale ./fractale
+  opam install fractale
 ```
 or build with OMake.
 
 ```
-  git clone http://github.com/takahisa/metal.git metal
-  cd metal
-  omake build
-  omake install
+  git clone http://github.com/takahisa/fractale.git fractale
+  cd fractale
+  jbuilder build
+  jbuilder install
 ```
 
 ## Example
@@ -31,8 +23,8 @@ or build with OMake.
 A parser and printer implementation for the arithmetic expression can be written as follows.
 
 ```ocaml
-open Metal
-open Metal.Iso
+open Fractale.SYM
+open Fractale.Iso
 
 type 'a exp =
   | Int: int -> int exp
@@ -86,4 +78,4 @@ let _ = Pretty.show (fun () -> let module M = Syntax(Pretty) in M.exp) (Sub (Add
 
 ## License
 
-metal released under the [MIT License](https://raw.githubusercontent.com/takahisa/parseq/master/LICENSE.txt).
+fractale released under the [MIT License](https://raw.githubusercontent.com/takahisa/fractale/master/LICENSE.txt).

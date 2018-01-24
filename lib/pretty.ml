@@ -19,8 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-open Metal_iso
-open Metal_aux
+open Iso
+open Aux
 
 type 'a repr = { run: input:'a -> string option }
 

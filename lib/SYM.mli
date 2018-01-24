@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-open Metal_iso
+open Iso
 
 module type META_SYNTAX = sig
   type 'a repr

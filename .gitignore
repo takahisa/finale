@@ -7,3 +7,6 @@
 *.out
 *.a
 *.o
+_build/
+.merlin
+*.install
