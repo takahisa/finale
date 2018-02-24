@@ -1,0 +1,12 @@
+*.omc
+*.omakedb
+*.omakedb.cache
+*.cmo
+*.cmx
+*.cmi
+*.out
+*.a
+*.o
+_build/
+.merlin
+*.install
