@@ -1,0 +1,7 @@
+(jbuild_version 1)
+(library
+ ((name finale)
+  (public_name finale)
+  (libraries (core))
+  (modes (native byte))
+  (flags (:standard -g -linkall))))
