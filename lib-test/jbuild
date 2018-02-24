@@ -1,0 +1,11 @@
+(jbuild_version 1)
+(executable
+ ((name finale_tt)
+  (libraries (core core_bench ounit finale))
+  (modes (native byte))
+  (flags (:standard -g -linkall))))
+
+(alias
+ ((name runtest)
+  (deps (finale_tt.exe))
+  (action (run ${<}))))
