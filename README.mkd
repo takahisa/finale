@@ -1,0 +1,28 @@
+Finale - Invertible syntax for OCaml
+====
+
+Finale is tagless-final based invertible syntax library for OCaml.
+
+## Requirements
+
+Please see [depends](https://raw.githubusercontent.com/takahisa/finale/master/finale.opam) section in `finale.opam` file.
+
+## Installation
+
+Install with OPAM
+```sh
+opam pin add finale https://github.com/takahisa/finale.git
+opam install finale
+```
+
+Or install with jbuilder(dune).
+```sh
+git clone http://github.com/takahisa/finale.git finale
+cd finale
+jbuilder build
+jbuilder install
+```
+
+## License
+
+Finale released under the [MIT License](https://raw.githubusercontent.com/takahisa/finale/master/LICENSE.txt).
