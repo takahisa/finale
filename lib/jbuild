@@ -5,4 +5,3 @@
   (libraries (core))
   (modes (native byte))
   (flags (:standard -g -linkall))))
-
