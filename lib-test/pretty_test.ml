@@ -23,34 +23,51 @@ open OUnit2
 open Finale
 open Finale.Iso
 open Finale.Iso_partial
+open Finale.Syntax
 open Finale.Pretty
 
-let tt = "Pretty" >::: [
-    "char" >:: begin fun _ ->
-      assert_equal (Some "f") @@ print char 'f'
-    end;
-    "(<|>)" >:: begin fun _ ->
-      let a = subset ((=) 'a') <$> char in
-      let b = subset ((=) 'b') <$> char in
-      assert_equal (Some "a") @@ print (a <|> b) 'a';
-      assert_equal (Some "b") @@ print (a <|> b) 'b';
-      assert_equal None @@ print (a <|> b) 'c'
-    end;
-    "(<*>)" >:: begin fun _ ->
-      let a = subset ((=) 'a') <$> char in
-      let b = subset ((=) 'b') <$> char in
-      assert_equal (Some "ab") @@ print (a <*> b) ('a', 'b');
-      assert_equal None @@ print (a <*> b) ('a', 'c');
-      assert_equal None @@ print (a <*> b) ('c', 'b');
-      assert_equal None @@ print (a <*> b) ('c', 'c')
-    end;
-    "fail" >:: begin fun _ ->
-      assert_equal None @@ print fail ();
-      assert_equal None @@ print fail 42
-    end;
-    "pure" >:: begin fun _ ->
-      assert_equal (Some "") @@ print (pure ()) ();
-      assert_equal (Some "") @@ print (pure 42) 42;
-      assert_equal None @@ print (pure 42) 24
-    end
-  ]
+module Make (Pretty: PRETTY) = struct
+  let tt = "Pretty" >::: [
+      "any" >:: begin fun _ ->
+        assert_equal (Some "f") @@ print any 'f'
+      end;
+      "(<|>)" >:: begin fun _ ->
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
+        assert_equal (Some "a") @@ print (a <|> b) 'a';
+        assert_equal (Some "b") @@ print (a <|> b) 'b';
+        assert_equal None @@ print (a <|> b) 'c'
+      end;
+      "(<*>)" >:: begin fun _ ->
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
+        assert_equal (Some "ab") @@ print (a <*> b) ('a', 'b');
+        assert_equal None @@ print (a <*> b) ('a', 'c');
+        assert_equal None @@ print (a <*> b) ('c', 'b');
+        assert_equal None @@ print (a <*> b) ('c', 'c')
+      end;
+      "fail" >:: begin fun _ ->
+        assert_equal None @@ print fail ();
+        assert_equal None @@ print fail 42
+      end;
+      "pure" >:: begin fun _ ->
+        assert_equal (Some "") @@ print (pure ()) ();
+        assert_equal (Some "") @@ print (pure 42) 42;
+        assert_equal None @@ print (pure 42) 24
+      end;
+      "(~!)" >:: begin fun _ ->
+        let a = element 'a' <$> any in
+        let b = element 'b' <$> any in
+        assert_equal (Some "") @@ print (~&a) ();
+        assert_equal (Some "") @@ print (~&b) ();
+        assert_equal None @@ print ~&fail ()
+      end;
+      "(~&)" >:: begin fun _ ->
+        let a = element 'a' <$> any in
+        let b = element 'b' <$> any in
+        assert_equal (Some "") @@ print (~&a) ();
+        assert_equal (Some "") @@ print (~&b) ();
+        assert_equal None @@ print ~&fail ()
+      end
+    ]
+end

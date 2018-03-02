@@ -67,7 +67,23 @@ let skip _ =
   fun () ->
     Some ""
 
-let char =
+let (~!) p0 =
+  fun () ->
+    match run p0 () with
+    | Some _ ->
+      Some ""
+    | None ->
+      None
+
+let (~&) p0 =
+  fun () ->
+    match run p0 () with
+    | Some _ ->
+      Some ""
+    | None ->
+      None
+
+let any =
   fun x0 ->
     return (String.make 1 x0)
 

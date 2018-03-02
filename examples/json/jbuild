@@ -1,5 +1,9 @@
 (jbuild_version 1)
 (executables
- ((names        (json))
-  (public_names (json))
+ ((names (json))
   (libraries (core finale))))
+
+(alias
+ ((name  json)
+  (deps (json.exe))
+  (action (run ${<}))))
