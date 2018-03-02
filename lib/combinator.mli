@@ -22,27 +22,5 @@
 open Iso
 open Iso_partial
 
-module Make (Syntax: Syntax_intf.S) : sig
-  open Syntax
-  val ( <*): 'a syntax -> unit syntax -> 'a syntax
-  val ( *>): unit syntax -> 'a syntax -> 'a syntax
-  val sequence: 'a syntax list -> 'a list syntax
-  val choice: 'a syntax list -> 'a syntax
-  val option: 'a syntax -> 'a option syntax
-  val between: unit syntax -> unit syntax -> 'a syntax -> 'a syntax
-
-  val count: int -> 'a syntax -> 'a list syntax
-  val rep0: 'a syntax -> 'a list syntax
-  val rep1: 'a syntax -> 'a list syntax
-  val sep_by0: delimiter:unit syntax -> 'a syntax -> 'a list syntax
-  val sep_by1: delimiter:unit syntax -> 'a syntax -> 'a list syntax
-  val end_by0: delimiter:unit syntax -> 'a syntax -> 'a list syntax
-  val end_by1: delimiter:unit syntax -> 'a syntax -> 'a list syntax
-  val sep_end_by0: delimiter:unit syntax -> 'a syntax -> 'a list syntax
-  val sep_end_by1: delimiter:unit syntax -> 'a syntax -> 'a list syntax
-
-  val lower: char syntax
-  val upper: char syntax
-  val alpha: char syntax
-  val digit: char syntax
-end
+module Make (S: Syntax_intf.S)
+  : Combinator_intf.S with type 'a syntax := 'a S.syntax

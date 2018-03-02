@@ -20,14 +20,26 @@
  * THE SOFTWARE.
  *)
 open OUnit2
+open Finale
+
+module StandardParser_test = Parser_test.Make(Parser)
+module StandardPretty_test = Pretty_test.Make(Pretty)
+module Syntax_test = struct
+  module Syntax = Syntax.Make (Pretty) (Parser)
+  let tt = "Syntax" >::: [
+      (let module M = Parser_test.Make(Syntax) in M.tt);
+      (let module M = Pretty_test.Make(Syntax) in M.tt);
+  ]
+end
 
 let _ =
   run_test_tt_main begin
     "Finale" >::: [
       Iso_test.tt;
       Lazy_stream_test.tt;
-      Pretty_test.tt;
-      Parser_test.tt;
+      StandardPretty_test.tt;
+      StandardParser_test.tt;
+      Syntax_test.tt;
       Combinator_test.tt
     ]
   end

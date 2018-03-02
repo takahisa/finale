@@ -23,39 +23,54 @@ open OUnit2
 open Finale
 open Finale.Iso
 open Finale.Iso_partial
+open Finale.Syntax
 open Finale.Parser
 
-let tt = "Parser" >::: [
-    "char" >:: begin fun _ ->
-      assert_equal (Some 'f') @@ parse char "foo";
-      assert_equal (Some 'b') @@ parse char "bar";
-      assert_equal None @@ parse char ""
-    end;
-    "(<|>)" >:: begin fun _ ->
-      let a = subset ((=) 'a') <$> char in
-      let b = subset ((=) 'b') <$> char in
-      assert_equal (Some 'a') @@ parse (a <|> b) "a";
-      assert_equal (Some 'a') @@ parse (b <|> a) "a";
-      assert_equal None @@ parse (a <|> b) "c"
-    end;
-    "(<*>)" >:: begin fun _ ->
-      let a = subset ((=) 'a') <$> char in
-      let b = subset ((=) 'b') <$> char in
-      assert_equal (Some ('a', 'b')) @@ parse (a <*> b) "ab";
-      assert_equal None @@ parse (a <*> b) "ac";
-      assert_equal None @@ parse (a <*> b) "cb";
-      assert_equal None @@ parse (a <*> b) "a";
-      assert_equal None @@ parse (a <*> b) "b"
-    end;
-    "fail" >:: begin fun _ ->
-      assert_equal None @@ parse fail "foo";
-      assert_equal None @@ parse fail "bar";
-      assert_equal None @@ parse fail ""
-    end;
-    "pure" >:: begin fun _ ->
-      assert_equal (Some ()) @@ parse (pure ()) "foo";
-      assert_equal (Some ()) @@ parse (pure ()) "";
-      assert_equal (Some ('a', 'b')) @@ parse (pure 'a' <*> char) "bar";
-      assert_equal (Some ('b', 'b')) @@ parse (pure 'b' <*> char) "bar"
-    end
-  ]
+module Make (Parser: PARSER) = struct
+  open Parser
+
+  let tt = "Parser" >::: [
+      "any" >:: begin fun _ ->
+        assert_equal (Some 'f') @@ parse any "foo";
+        assert_equal (Some 'b') @@ parse any "bar";
+        assert_equal None @@ parse any ""
+      end;
+      "(<|>)" >:: begin fun _ ->
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
+        assert_equal (Some 'a') @@ parse (a <|> b) "a";
+        assert_equal (Some 'a') @@ parse (b <|> a) "a";
+        assert_equal None @@ parse (a <|> b) "c"
+      end;
+      "(<*>)" >:: begin fun _ ->
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
+        assert_equal (Some ('a', 'b')) @@ parse (a <*> b) "ab";
+        assert_equal None @@ parse (a <*> b) "ac";
+        assert_equal None @@ parse (a <*> b) "cb";
+        assert_equal None @@ parse (a <*> b) "a";
+        assert_equal None @@ parse (a <*> b) "b"
+      end;
+      "fail" >:: begin fun _ ->
+        assert_equal None @@ parse fail "foo";
+        assert_equal None @@ parse fail "bar";
+        assert_equal None @@ parse fail ""
+      end;
+      "pure" >:: begin fun _ ->
+        assert_equal (Some ()) @@ parse (pure ()) "foo";
+        assert_equal (Some ()) @@ parse (pure ()) "";
+        assert_equal (Some ('a', 'b')) @@ parse (pure 'a' <*> any) "bar";
+        assert_equal (Some ('b', 'b')) @@ parse (pure 'b' <*> any) "bar"
+      end;
+      "(~!)" >:: begin fun _ ->
+        assert_equal (Some ()) @@ parse (~!fail) "bar";
+        assert_equal (Some ((), 'b')) @@ parse (~!fail <*> any) "bar";
+        assert_equal None @@ parse (~!(pure ())) "bar";
+      end;
+      "(~&)" >:: begin fun _ ->
+        assert_equal None @@ parse (~&fail) "bar";
+        assert_equal (Some ()) @@ parse (~&(pure ())) "bar";
+        assert_equal (Some ((), 'b')) @@ parse (~&(pure ()) <*> any) "bar";
+      end
+    ]
+end
