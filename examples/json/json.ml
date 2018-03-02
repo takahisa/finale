@@ -58,11 +58,6 @@ module Json (Pretty: Syntax.PRETTY) (Parser: Syntax.PARSER) = struct
   module C = Combinator.Make (S)
   include S
   include C
-
-  let whitespace = choice (List.map ~f:(fun c -> element c <$> char) [' '; '\t'; '\r'; '\n'])
-  let spaces0 = skip (rep0 whitespace)
-  let spaces1 = whitespace *> spaces0
-
   let lbracket = (element '[' <$> char) <* spaces0
   let rbracket = (element ']' <$> char) <* spaces0
   let lbrace = (element '{' <$> char) <* spaces0
