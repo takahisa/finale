@@ -45,4 +45,7 @@ module Make (Syntax: Syntax_intf.S) : sig
   val upper: char syntax
   val alpha: char syntax
   val digit: char syntax
+  val space: unit syntax
+  val spaces0: unit syntax
+  val spaces1: unit syntax
 end

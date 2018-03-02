@@ -201,4 +201,27 @@ let tt = "Combinator" >::: [
       assert_equal None @@ parse digit "A";
       assert_equal None @@ parse digit "Z";
     end;
+    "space" >:: begin fun _ ->
+      assert_equal (Some "") @@ print space ();
+      assert_equal (Some ()) @@ parse space " ";
+      assert_equal (Some ()) @@ parse space "\t";
+      assert_equal (Some ()) @@ parse space "\r";
+      assert_equal (Some ()) @@ parse space "\n";
+      assert_equal None @@ parse space "a";
+      assert_equal None @@ parse space "0";
+    end;
+    "space0" >:: begin fun _ ->
+      assert_equal (Some "") @@ print spaces0 ();
+      assert_equal (Some ()) @@ parse spaces0 " \t\r\n";
+      assert_equal (Some ()) @@ parse spaces0 "";
+      assert_equal (Some 'a') @@ parse (spaces0 *> char) " \t\r\na";
+      assert_equal (Some '0') @@ parse (spaces0 *> char) " \t\r\n0";
+    end;
+    "space1" >:: begin fun _ ->
+      assert_equal (Some " ") @@ print spaces1 ();
+      assert_equal (Some ()) @@ parse spaces1 " \t\r\n";
+      assert_equal None @@ parse spaces1 "";
+      assert_equal (Some 'a') @@ parse (spaces1 *> char) " \t\r\na";
+      assert_equal (Some '0') @@ parse (spaces1 *> char) " \t\r\n0";
+    end
   ]

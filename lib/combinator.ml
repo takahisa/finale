@@ -66,4 +66,7 @@ module Make (Syntax: Syntax_intf.S) = struct
   let upper = subset Char.is_uppercase <$> char
   let digit = subset Char.is_digit <$> char
   let alpha = subset Char.is_alpha <$> char
+  let space = skip (subset Char.is_whitespace <$> char)
+  let spaces0 = skip (rep0 space)
+  let spaces1 = ((element ' ' <$> char) *> skip (rep0 space)) <|> skip (rep1 space)
 end
