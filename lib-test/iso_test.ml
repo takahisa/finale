@@ -24,6 +24,25 @@ open Finale
 open Finale.Iso
 open Finale.Iso_partial
 
+type 'a exp =
+  | Int: int -> int exp
+  | Add: int exp * int exp -> int exp
+  | Sub: int exp * int exp -> int exp
+
+let intE =
+  { fwd = (function n -> Some (Int n));
+    bwd = (function Int n -> Some n | _ -> None);
+  }
+let addE =
+  { fwd = (function (e0, e1) -> Some (Add (e0, e1)));
+    bwd = (function Add (e0, e1) -> Some (e0, e1) | _ -> None);
+  }
+let subE =
+  { fwd = (function (e0, e1) -> Some (Sub (e0, e1)));
+    bwd = (function Sub (e0, e1) -> Some (e0, e1) | _ -> None);
+  }
+  
+
 let tt = "Iso" >::: [
     "string" >:: begin fun _ ->
       assert_equal (Some "foo") @@ fwd string ['f'; 'o'; 'o'];
@@ -78,5 +97,17 @@ let tt = "Iso" >::: [
       assert_equal (Some 'a') @@ bwd (subset ((=) 'a')) 'a';
       assert_equal None @@ fwd (subset ((=) 'a')) 'b';
       assert_equal None @@ bwd (subset ((=) 'a')) 'b';
+    end;
+    "foldl" >:: begin fun _ ->
+      assert_equal None @@ fwd (foldl addE) [];
+      assert_equal (Some (Int 1)) @@ fwd (foldl addE) [Int 1];
+      assert_equal (Some (Add (Int 1, Int 2))) @@ fwd (foldl addE) [Int 1; Int 2];
+      assert_equal (Some (Add (Add (Int 1, Int 2),  Int 3))) @@ fwd (foldl addE) [Int 1; Int 2; Int 3];
+    end;
+    "foldr" >:: begin fun _ ->
+      assert_equal None @@ fwd (foldr addE) [];
+      assert_equal (Some (Int 1)) @@ fwd (foldr addE) [Int 1];
+      assert_equal (Some (Add (Int 1, Int 2))) @@ fwd (foldr addE) [Int 1; Int 2];
+      assert_equal (Some (Add (Int 1, Add (Int 2, Int 3)))) @@ fwd (foldr addE) [Int 1; Int 2; Int 3];
     end
 ]

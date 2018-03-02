@@ -79,3 +79,36 @@ let boolean =
   { fwd = (function x0 -> try Some (bool_of_string x0) with Invalid_argument _ -> None);
     bwd = (function x0 -> try Some (string_of_bool x0) with Invalid_argument _ -> None);
   }
+
+let head xs =
+  List.hd xs
+let tail xs =
+  List.tl xs
+let init xs = 
+  List.take xs (List.length xs - 1) |> Option.some
+let last xs =
+  List.last xs
+
+let rec unfold ~f ~init =
+  match f init with
+  | Some (x0, init) ->
+    x0 :: unfold ~f ~init
+  | None ->
+    []
+let foldl d0 xs0 =
+  tail xs0 >>= List.fold_left ~init:(head xs0) ~f:begin fun x y ->
+    Option.both x (Some y) >>= d0.fwd
+  end
+let foldr d0 xs0 =
+  init xs0 >>= List.fold_right ~init:(last xs0) ~f:begin fun x y -> 
+    Option.both (Some x) y >>= d0.fwd
+  end
+
+let foldl d0 =
+  { fwd = (function [] -> None | xs0 -> foldl d0 xs0);
+    bwd = (function x0 -> unfold ~f:d0.bwd ~init:x0 |> Option.some);
+  }
+let foldr d0 =
+  { fwd = (function [] -> None | xs0 -> foldr d0 xs0);
+    bwd = (function x0 -> unfold ~f:d0.bwd ~init:x0 |> Option.some);
+  }
