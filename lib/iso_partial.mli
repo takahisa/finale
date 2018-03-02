@@ -25,7 +25,7 @@ val subset: ('a -> bool) -> ('a, 'a) iso
 val element: ?compare:('a -> 'a -> int) -> 'a -> ('a, unit) iso
 
 val singleton: ('a, 'a list) iso
-val con: ('a * 'a list, 'a list) iso
+val cons: ('a * 'a list, 'a list) iso
 val nil: (unit, 'a list) iso
 
 val fst: ('b, unit) iso -> ('a * 'b, 'a) iso

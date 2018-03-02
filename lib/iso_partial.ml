@@ -37,7 +37,7 @@ let singleton =
   { fwd = (function x0 -> Some (x0 :: []));
     bwd = (function x0 :: [] -> Some x0 | _ -> None)
   }
-let con =
+let cons =
   { fwd = (function (x0, xs0) -> Some (x0 :: xs0));
     bwd = (function (x0 :: xs0) -> Some (x0, xs0) | _ -> None)
   }
