@@ -41,6 +41,7 @@ module Make (Syntax: Syntax_intf.S) : sig
   val sep_end_by0: delimiter:unit syntax -> 'a syntax -> 'a list syntax
   val sep_end_by1: delimiter:unit syntax -> 'a syntax -> 'a list syntax
 
+  val text: string -> unit syntax
   val lower: char syntax
   val upper: char syntax
   val alpha: char syntax

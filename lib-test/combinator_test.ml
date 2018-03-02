@@ -145,6 +145,15 @@ let tt = "Combinator" >::: [
       assert_equal (Some ['b']) @@ parse (sep_end_by1 ~delimiter:comma char) "b";
       assert_equal (Some ['b']) @@ parse (sep_end_by1 ~delimiter:comma char) "b,";
     end;
+    "text" >:: begin fun _ ->
+      assert_equal (Some "foo") @@ print (text "foo") ();
+      assert_equal (Some "bar") @@ print (text "bar") ();
+      assert_equal (Some ()) @@ parse (text "foo") "foo";
+      assert_equal (Some ()) @@ parse (text "foo") "fooz";
+      assert_equal (Some ()) @@ parse (text "bar") "bar";
+      assert_equal (Some ()) @@ parse (text "bar") "barz";
+      assert_equal None @@ parse (text "bar") "baz";
+    end;
     "lower" >:: begin fun _ ->
       assert_equal (Some "a") @@ print lower 'a';
       assert_equal (Some "z") @@ print lower 'z';

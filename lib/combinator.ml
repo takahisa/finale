@@ -62,6 +62,11 @@ module Make (Syntax: Syntax_intf.S) = struct
 
   let between p0 p1 p2 =
     p0 *> p2 <* p1
+
+  let text z =
+    let n = String.length z in
+    compose string (element z) <$> count n char
+
   let lower = subset Char.is_lowercase <$> char
   let upper = subset Char.is_uppercase <$> char
   let digit = subset Char.is_digit <$> char
