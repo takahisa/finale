@@ -22,6 +22,8 @@
 include (module type of Syntax_intf)
 
 module Make (Pretty: PRETTY) (Parser: PARSER) : sig
+  type 'a parser = 'a Parser.parser
+  type 'a pretty = 'a Pretty.pretty
   include Syntax_intf.S
   val print: 'a syntax -> 'a -> string option
   val parse: 'a syntax -> string -> 'a option

@@ -34,12 +34,10 @@ end
 module type PARSER = sig
   include S
   type 'a parser
-  val apply: 'a parser -> char Lazy_stream.t -> (char Lazy_stream.t * 'a) option
   val parse: 'a syntax -> string -> 'a option
 end
 module type PRETTY = sig
   include S
   type 'a pretty
-  val apply: 'a pretty -> 'a -> string option
   val print: 'a syntax -> 'a -> string option
 end

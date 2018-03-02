@@ -22,6 +22,8 @@
 include Syntax_intf
 
 module Make (Pretty: PRETTY) (Parser: PARSER) = struct
+  type 'a parser = 'a Parser.parser
+  type 'a pretty = 'a Pretty.pretty
   type 'a syntax =
     { parse: unit -> 'a Parser.syntax;
       print: unit -> 'a Pretty.syntax 
