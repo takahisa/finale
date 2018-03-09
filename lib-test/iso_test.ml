@@ -103,11 +103,17 @@ let tt = "Iso" >::: [
       assert_equal (Some (Int 1)) @@ fwd (foldl addE) [Int 1];
       assert_equal (Some (Add (Int 1, Int 2))) @@ fwd (foldl addE) [Int 1; Int 2];
       assert_equal (Some (Add (Add (Int 1, Int 2),  Int 3))) @@ fwd (foldl addE) [Int 1; Int 2; Int 3];
+      assert_equal (Some [Int 1]) @@ bwd (foldl addE) (Int 1);
+      assert_equal (Some [Int 1; Int 2]) @@ bwd (foldl addE) (Add (Int 1, Int 2));
+      assert_equal (Some [Int 1; Int 2; Int 3]) @@ bwd (foldl addE) (Add (Int 1, Add (Int 2, Int 3)));
     end;
     "foldr" >:: begin fun _ ->
       assert_equal None @@ fwd (foldr addE) [];
       assert_equal (Some (Int 1)) @@ fwd (foldr addE) [Int 1];
       assert_equal (Some (Add (Int 1, Int 2))) @@ fwd (foldr addE) [Int 1; Int 2];
       assert_equal (Some (Add (Int 1, Add (Int 2, Int 3)))) @@ fwd (foldr addE) [Int 1; Int 2; Int 3];
+      assert_equal (Some [Int 1]) @@ bwd (foldl addE) (Int 1);
+      assert_equal (Some [Int 1; Int 2]) @@ bwd (foldl addE) (Add (Int 1, Int 2));
+      assert_equal (Some [Int 1; Int 2; Int 3]) @@ bwd (foldl addE) (Add (Int 1, Add (Int 2, Int 3)));
     end
 ]

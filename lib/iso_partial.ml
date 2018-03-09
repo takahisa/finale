@@ -94,7 +94,7 @@ let rec unfold ~f ~init =
   | Some (x0, init) ->
     x0 :: unfold ~f ~init
   | None ->
-    []
+    init :: []
 let foldl d0 xs0 =
   tail xs0 >>= List.fold_left ~init:(head xs0) ~f:begin fun x y ->
     Option.both x (Some y) >>= d0.fwd
