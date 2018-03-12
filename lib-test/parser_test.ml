@@ -61,6 +61,16 @@ module Make (PARSER: PARSER) = struct
         assert_equal (Some ()) @@ parse (pure ()) "";
         assert_equal (Some ('a', 'b')) @@ parse (pure 'a' <*> char) "bar";
         assert_equal (Some ('b', 'b')) @@ parse (pure 'b' <*> char) "bar"
+      end;
+      "(~!)" >:: begin fun _ ->
+        assert_equal (Some ()) @@ parse (~!fail) "bar";
+        assert_equal (Some ((), 'b')) @@ parse (~!fail <*> char) "bar";
+        assert_equal None @@ parse (~!(pure ())) "bar";
+      end;
+      "(~&)" >:: begin fun _ ->
+        assert_equal None @@ parse (~&fail) "bar";
+        assert_equal (Some ()) @@ parse (~&(pure ())) "bar";
+        assert_equal (Some ((), 'b')) @@ parse (~&(pure ()) <*> char) "bar";
       end
     ]
 end

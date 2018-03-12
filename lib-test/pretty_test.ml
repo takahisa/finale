@@ -54,6 +54,20 @@ module Make (Pretty: PRETTY) = struct
         assert_equal (Some "") @@ print (pure ()) ();
         assert_equal (Some "") @@ print (pure 42) 42;
         assert_equal None @@ print (pure 42) 24
+      end;
+      "(~!)" >:: begin fun _ ->
+        let a = element 'a' <$> char in
+        let b = element 'b' <$> char in
+        assert_equal (Some "") @@ print (~&a) ();
+        assert_equal (Some "") @@ print (~&b) ();
+        assert_equal None @@ print ~&fail ()
+      end;
+      "(~&)" >:: begin fun _ ->
+        let a = element 'a' <$> char in
+        let b = element 'b' <$> char in
+        assert_equal (Some "") @@ print (~&a) ();
+        assert_equal (Some "") @@ print (~&b) ();
+        assert_equal None @@ print ~&fail ()
       end
     ]
 end
