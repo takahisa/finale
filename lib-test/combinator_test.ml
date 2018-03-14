@@ -211,7 +211,7 @@ let tt = "Combinator" >::: [
       assert_equal None @@ parse digit "Z";
     end;
     "space" >:: begin fun _ ->
-      assert_equal (Some "") @@ print space ();
+      assert_equal (Some " ") @@ print space ();
       assert_equal (Some ()) @@ parse space " ";
       assert_equal (Some ()) @@ parse space "\t";
       assert_equal (Some ()) @@ parse space "\r";

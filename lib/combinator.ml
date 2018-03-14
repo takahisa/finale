@@ -72,7 +72,17 @@ module Make (Syntax: Syntax_intf.S) = struct
   let upper = subset Char.is_uppercase <$> any
   let digit = subset Char.is_digit <$> any
   let alpha = subset Char.is_alpha <$> any
-  let space = skip (subset Char.is_whitespace <$> any)
-  let spaces0 = skip (rep0 space)
-  let spaces1 = ((element ' ' <$> any) *> skip (rep0 space)) <|> skip (rep1 space)
+  let space = choice (List.map ~f:char [' '; '\t'; '\r'; '\n'])
+  let spaces0 =
+    let iso =
+      { fwd = (function _ -> Some ());
+        bwd = (function _ -> Some (List.init 0 ~f:(Fn.const ())))
+      } 
+    in iso <$> rep0 space
+  let spaces1 =
+    let iso =
+      { fwd = (function _ -> Some ());
+        bwd = (function _ -> Some (List.init 1 ~f:(Fn.const ())))
+      } 
+    in iso <$> rep1 space
 end
