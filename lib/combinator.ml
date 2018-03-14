@@ -66,7 +66,8 @@ module Make (Syntax: Syntax_intf.S) = struct
   let text z =
     let n = String.length z in
     compose string (element z) <$> count n any
-
+  let char c =
+    element c <$> any
   let lower = subset Char.is_lowercase <$> any
   let upper = subset Char.is_uppercase <$> any
   let digit = subset Char.is_digit <$> any
