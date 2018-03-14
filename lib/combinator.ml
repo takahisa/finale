@@ -61,10 +61,10 @@ module Make (S: Syntax_intf.S) = struct
     rep0 (p1 <* p0)
 
   let sep_end_by1 ~delimiter:p0 p1 =
-    sep_by1 p0 p1 <* skip (option p0)
+    sep_by1 p0 p1 <* opt p0
 
   let sep_end_by0 ~delimiter:p0 p1 =
-    sep_by0 p0 p1 <* skip (option p0)
+    sep_by0 p0 p1 <* opt p0
 
   let between p0 p1 p2 =
     p0 *> p2 <* p1

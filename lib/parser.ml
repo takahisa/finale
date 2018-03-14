@@ -62,14 +62,6 @@ let pure ?(compare = Pervasives.compare) x0 =
   fun r0 ->
     return (r0, x0)
 
-let skip p0 =
-  fun r0 ->
-    match run p0 r0 with
-    | Some (r1, _) ->
-      Some (r1, ())
-    | None ->
-      None
-
 let (~!) p0 =
   fun r0 ->
     match run p0 r0 with
@@ -85,6 +77,14 @@ let (~&) p0 =
       Some (r0, ())
     | None ->
       None
+
+let opt p0 =
+  fun r0 ->
+    match run p0 r0 with
+    | Some (r1, _) ->
+      Some (r1, ())
+    | None ->
+      Some (r0, ())
 
 let any =
   fun r0 ->

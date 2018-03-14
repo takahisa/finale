@@ -63,10 +63,6 @@ let pure ?(compare = Pervasives.compare) =
     if (compare x0 x1 = 0) then Some ""
                            else None
 
-let skip _ =
-  fun () ->
-    Some ""
-
 let (~!) p0 =
   fun () ->
     match run p0 () with
@@ -82,6 +78,10 @@ let (~&) p0 =
       Some ""
     | None ->
       None
+
+let opt p0 =
+  fun () ->
+    ignore (run p0 ()); Some ""
 
 let any =
   fun x0 ->

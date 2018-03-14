@@ -63,11 +63,6 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
       print = (fun () -> Pretty.pure ~compare x0)
     }
 
-  let skip p0 =
-    { parse = (fun () -> Parser.(skip @@ p0.parse ()));
-      print = (fun () -> Pretty.(skip @@ p0.print ()))
-    }
-
   let (~!) p0 =
     { parse = (fun () -> Parser.((~!) @@ p0.parse ()));
       print = (fun () -> Pretty.((~&) @@ p0.print ()))
@@ -76,6 +71,11 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
   let (~&) p0 =
     { parse = (fun () -> Parser.((~&) @@ p0.parse ()));
       print = (fun () -> Pretty.((~&) @@ p0.print ()))
+    }
+
+  let opt p0 =
+    { parse = (fun () -> Parser.(opt @@ p0.parse ()));
+      print = (fun () -> Pretty.(opt @@ p0.print ()))
     }
 
   let any =
