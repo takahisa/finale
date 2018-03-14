@@ -32,13 +32,6 @@ type 'a exp =
   | DivE: int exp * int exp -> int exp
   | IntE: int -> int exp
 
-let rec eval = function
-  | AddE (e0, e1) -> eval e0 + eval e1
-  | SubE (e0, e1) -> eval e0 - eval e1
-  | MulE (e0, e1) -> eval e0 * eval e1
-  | DivE (e0, e1) -> eval e0 / eval e1
-  | IntE n0 -> n0
-
 let addE =
   { fwd = (function (e0, e1) -> Some (AddE (e0, e1)));
     bwd = (function AddE (e0, e1) -> Some (e0, e1) | _ -> None)
@@ -61,37 +54,47 @@ let intE =
   }
 
 module Calc (Pretty: Syntax.PRETTY) (Parser: Syntax.PARSER) = struct
-  module S = Syntax.Make (Pretty) (Parser)
-  module C = Combinator.Make(S)
-  include S
-  include C
+  module Combinator_base = Syntax.Make (Pretty) (Parser)
+  module Combinator = Combinator.Make(Combinator_base)
+  open Combinator_base
+  open Combinator
+  let lp = char '('
+  let rp = char ')'
 
-  let lp = element '(' <$> any
-  let rp = element ')' <$> any
+  let infixop_add = char '+'
+  let infixop_sub = char '-'
+  let infixop_mul = char '*'
+  let infixop_div = char '/'
 
-  let add = element '+' <$> any
-  let sub = element '-' <$> any
-  let mul = element '*' <$> any
-  let div = element '/' <$> any
-
-  let num = compose string integer <$> rep1 digit
+  let num = (compose string integer <$> rep1 digit)
   let exp = fix @@ fun exp ->
-        (between lp rp (addE <$> (exp <*> (add *> exp))))
-    <|> (between lp rp (subE <$> (exp <*> (sub *> exp))))
-    <|> (between lp rp (mulE <$> (exp <*> (mul *> exp))))
-    <|> (between lp rp (divE <$> (exp <*> (div *> exp))))
+        (between lp rp (addE <$> (exp <*> (infixop_add *> exp))))
+    <|> (between lp rp (subE <$> (exp <*> (infixop_sub *> exp))))
+    <|> (between lp rp (mulE <$> (exp <*> (infixop_mul *> exp))))
+    <|> (between lp rp (divE <$> (exp <*> (infixop_div *> exp))))
     <|> (intE <$> num)
+
+  let parse = Combinator_base.parse exp
+  let print = Combinator_base.print exp
+
+  let rec eval = function
+    | IntE n0 -> n0
+    | AddE (e0, e1) -> eval e0 + eval e1
+    | SubE (e0, e1) -> eval e0 - eval e1
+    | MulE (e0, e1) -> eval e0 * eval e1
+    | DivE (e0, e1) -> eval e0 / eval e1
 end
 
 let _ =
   let module Calc = Calc (Pretty) (Parser) in
   let result =
-    In_channel.input_line In_channel.stdin >>= fun line ->
-    Calc.parse Calc.exp line >>= fun expr ->
-    Calc.print Calc.exp expr >>= fun text ->
-    return (expr, text) in
+    In_channel.input_line In_channel.stdin >>= fun z ->
+    Calc.parse z >>= fun e ->
+    Calc.print e >>= fun z ->
+    return (e, z)
+  in
   match result with
-  | Some (parse_result, print_result) ->
-    Printf.printf "Success %s :- %d\n" print_result (eval parse_result)
-  | _ ->
+  | Some (_, z) ->
+    print_endline z
+  | None ->
     print_endline "Failure"

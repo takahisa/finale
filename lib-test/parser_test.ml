@@ -26,7 +26,7 @@ open Finale.Iso_partial
 open Finale.Syntax
 open Finale.Parser
 
-module Make (PARSER: PARSER) = struct
+module Make (Parser: PARSER) = struct
   open Parser
 
   let tt = "Parser" >::: [

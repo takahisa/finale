@@ -33,14 +33,14 @@ open Syntax_combinators
 
 let tt = "Combinator" >::: [
     "(*>)" >:: begin fun _ ->
-      let a = element 'a' <$> any in
-      let b = element 'b' <$> any in
+      let a = char 'a' in
+      let b = char 'b' in
       assert_equal (Some "ab") @@ (print (a *> b) ());
       assert_equal (Some ()) @@ (parse (a *> b) "ab");
     end;
     "(<*)" >:: begin fun _ ->
-      let a = element 'a' <$> any in
-      let b = element 'b' <$> any in
+      let a = char 'a' in
+      let b = char 'b' in
       assert_equal (Some "ab") @@ (print (a <* b) ());
       assert_equal (Some ()) @@ (parse (a <* b) "ab");
     end;

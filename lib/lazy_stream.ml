@@ -53,7 +53,9 @@ let tail s =
 
 let of_stream stream =
   from ~f:(fun _ -> try Some (Stream.next stream) with Stream.Failure -> None)
+
 let of_string string =
   of_stream (Stream.of_string string)
+
 let of_channel channel =
   of_stream (Stream.of_channel channel)

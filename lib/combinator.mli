@@ -23,4 +23,4 @@ open Iso
 open Iso_partial
 
 module Make (S: Syntax_intf.S)
-    : Combinator_intf.S with type 'a syntax := 'a S.syntax
+  : Combinator_intf.S with type 'a syntax := 'a S.syntax

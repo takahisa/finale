@@ -33,14 +33,17 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
     { parse = (fun () -> Parser.(d0 <$> p0.parse ()));
       print = (fun () -> Pretty.(d0 <$> p0.print ()))
     }
+
   let (<|>) p0 p1 =
     { parse = (fun () -> Parser.(p0.parse () <|> p1.parse ()));
       print = (fun () -> Pretty.(p0.print () <|> p1.print ()))
     }
+
   let (<*>) p0 p1 =
     { parse = (fun () -> Parser.(p0.parse () <*> p1.parse ()));
       print = (fun () -> Pretty.(p0.print () <*> p1.print ()))
     }
+
   let fix f =
     let rec parse = lazy (Parser.fix (fun parse -> (f { parse = (fun () -> parse); print = fix.print; }).parse ()))
         and print = lazy (Pretty.fix (fun print -> (f { print = (fun () -> print); parse = fix.parse; }).print ()))
@@ -49,6 +52,7 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
             print = (fun () -> Lazy.force print)
           }
     in fix
+
   let fail =
     { parse = (fun () -> Parser.fail);
       print = (fun () -> Pretty.fail)
@@ -68,6 +72,7 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
     { parse = (fun () -> Parser.((~!) @@ p0.parse ()));
       print = (fun () -> Pretty.((~&) @@ p0.print ()))
     }
+
   let (~&) p0 =
     { parse = (fun () -> Parser.((~&) @@ p0.parse ()));
       print = (fun () -> Pretty.((~&) @@ p0.print ()))
