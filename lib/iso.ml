@@ -24,41 +24,43 @@ open Core.Option
 
 type ('a, 'b) iso =
   { fwd: 'a -> 'b option;
-    bwd: 'b -> 'a option;
+    bwd: 'b -> 'a option
   }
+
 let iso ~fwd ~bwd =
   { fwd;
-    bwd;
+    bwd
   }
+
 let fwd d0 = d0.fwd
 let bwd d0 = d0.bwd
 
 let identity =
   { fwd = (function x0 -> Some x0);
-    bwd = (function x0 -> Some x0);
+    bwd = (function x0 -> Some x0)
   }
 
 let compose d0 d1 =
   { fwd = (function x0 -> d0.fwd x0 >>= d1.fwd);
-    bwd = (function x0 -> d1.bwd x0 >>= d0.bwd);
+    bwd = (function x0 -> d1.bwd x0 >>= d0.bwd)
   }
 
 let inverse d0 =
   { fwd = (function x0 -> d0.bwd x0);
-    bwd = (function x0 -> d0.fwd x0);
+    bwd = (function x0 -> d0.fwd x0)
   }
 
 let commute =
   { fwd = (function (x0, x1) -> Some (x1, x0));
-    bwd = (function (x0, x1) -> Some (x1, x0));
+    bwd = (function (x0, x1) -> Some (x1, x0))
   }
 
 let product d0 d1 =
   { fwd = (function (x0, x1) -> Option.both (d0.fwd x0) (d1.fwd x1));
-    bwd = (function (x0, x1) -> Option.both (d0.bwd x0) (d1.bwd x1));
+    bwd = (function (x0, x1) -> Option.both (d0.bwd x0) (d1.bwd x1))
   }
 
 let associate =
   { fwd = (function (x0, (x1, x2)) -> Some ((x0, x1), x2));
-    bwd = (function ((x0, x1), x2) -> Some (x0, (x1, x2)));
+    bwd = (function ((x0, x1), x2) -> Some (x0, (x1, x2)))
   }

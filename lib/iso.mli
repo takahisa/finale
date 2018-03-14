@@ -21,20 +21,15 @@
  *)
 type ('a, 'b) iso =
   { fwd: 'a -> 'b option;
-    bwd: 'b -> 'a option;
+    bwd: 'b -> 'a option
   }
 val iso: fwd:('a -> 'b option) -> bwd:('b -> 'a option) -> ('a, 'b) iso
 val fwd: ('a, 'b) iso -> 'a -> 'b option
 val bwd: ('a, 'b) iso -> 'b -> 'a option
 
 val identity: ('a, 'a) iso
-
 val compose: ('a, 'b) iso -> ('b, 'c) iso -> ('a, 'c) iso
-
 val inverse: ('a, 'b) iso -> ('b, 'a) iso
-
 val commute: ('a * 'b, 'b * 'a) iso
-
 val product: ('a, 'b) iso -> ('c, 'd) iso -> ('a * 'c, 'b * 'd) iso
-
 val associate: ('a * ('b * 'c), ('a * 'b) * 'c) iso

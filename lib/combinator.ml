@@ -24,13 +24,14 @@ open Core.Option
 open Iso
 open Iso_partial
 
-module Make (Syntax: Syntax_intf.S) = struct
-  open Syntax
+module Make (S: Syntax_intf.S) = struct
+  open S
+
   let ( *>) p0 p1 = snd (element ()) <$> (p0 <*> p1)
   let ( <*) p0 p1 = fst (element ()) <$> (p0 <*> p1)
 
   let sequence ps = 
-    List.fold_right ~f:(fun hd tl -> con <$> (hd <*> tl)) ~init:(pure []) ps
+    List.fold_right ~f:(fun hd tl -> cons <$> (hd <*> tl)) ~init:(pure []) ps
 
   let choice ps =
     List.fold_right ~f:(<|>) ~init:fail ps
@@ -40,30 +41,57 @@ module Make (Syntax: Syntax_intf.S) = struct
 
   let count n0 p0 =
     sequence @@ List.init n0 ~f:(Fn.const p0)
+
   let rep1 p0 =
-    fix (fun fix -> con <$> (p0 <*> (fix <|> pure [])))
+    fix (fun fix -> cons <$> (p0 <*> (fix <|> pure [])))
+
   let rep0 p0 =
     rep1 p0 <|> pure []
 
   let sep_by1 ~delimiter:p0 p1 =
-    con <$> (p1 <*> rep0 (p0 *> p1))
+    cons <$> (p1 <*> rep0 (p0 *> p1))
+
   let sep_by0 ~delimiter:p0 p1 =
     sep_by1 p0 p1 <|> pure []
 
   let end_by1 ~delimiter:p0 p1 =
     rep1 (p1 <* p0)
+
   let end_by0 ~delimiter:p0 p1 =
     rep0 (p1 <* p0)
 
   let sep_end_by1 ~delimiter:p0 p1 =
     sep_by1 p0 p1 <* skip (option p0)
+
   let sep_end_by0 ~delimiter:p0 p1 =
     sep_by0 p0 p1 <* skip (option p0)
 
   let between p0 p1 p2 =
     p0 *> p2 <* p1
-  let lower = subset Char.is_lowercase <$> char
-  let upper = subset Char.is_uppercase <$> char
-  let digit = subset Char.is_digit <$> char
-  let alpha = subset Char.is_alpha <$> char
+
+  let text z =
+    let n = String.length z in
+    compose string (element z) <$> count n any
+
+  let char c = element c <$> any
+
+  let lower = subset Char.is_lowercase <$> any
+  let upper = subset Char.is_uppercase <$> any
+  let digit = subset Char.is_digit <$> any
+  let alpha = subset Char.is_alpha <$> any
+  let space = choice (List.map ~f:char [' '; '\t'; '\r'; '\n'])
+
+  let spaces0 =
+    let iso =
+      { fwd = (function _ -> Some ());
+        bwd = (function _ -> Some (List.init 0 ~f:(Fn.const ())))
+      } 
+    in iso <$> rep0 space
+
+  let spaces1 =
+    let iso =
+      { fwd = (function _ -> Some ());
+        bwd = (function _ -> Some (List.init 1 ~f:(Fn.const ())))
+      } 
+    in iso <$> rep1 space
 end
