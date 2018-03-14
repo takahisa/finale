@@ -70,7 +70,23 @@ let skip p0 =
     | None ->
       None
 
-let char =
+let (~!) p0 =
+  fun r0 ->
+    match run p0 r0 with
+    | Some (_, ()) ->
+      None
+    | None ->
+      Some (r0, ())
+
+let (~&) p0 =
+  fun r0 ->
+    match run p0 r0 with
+    | Some (_, ()) ->
+      Some (r0, ())
+    | None ->
+      None
+
+let any =
   fun r0 ->
     try
       Some (Lazy_stream.tail r0, Lazy_stream.head r0)

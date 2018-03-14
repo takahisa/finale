@@ -25,57 +25,91 @@ open Iso
 
 let subset p =
   { fwd = (function x0 -> Option.some_if (p x0) x0);
-    bwd = (function x0 -> Option.some_if (p x0) x0);
+    bwd = (function x0 -> Option.some_if (p x0) x0)
   }
 
 let element ?(compare = Pervasives.compare) x0 =
   { fwd = (function x1 -> Option.some_if (compare x0 x1 = 0) ());
-    bwd = (function () -> Some x0);
+    bwd = (function () -> Some x0)
   }
 
 let singleton =
   { fwd = (function x0 -> Some (x0 :: []));
     bwd = (function x0 :: [] -> Some x0 | _ -> None)
   }
-let con =
+
+let cons =
   { fwd = (function (x0, xs0) -> Some (x0 :: xs0));
     bwd = (function (x0 :: xs0) -> Some (x0, xs0) | _ -> None)
   }
+
 let nil =
   { fwd = (function () -> Some []);
     bwd = (function [] -> Some () | _ -> None)
   }
 
+let rec unfold ~f ~init =
+  match f init with
+  | Some (x0, init) ->
+    x0 :: unfold ~f ~init
+  | None ->
+    init :: []
+
+let foldl d0 xs0 =
+  let head = List.hd xs0 in
+  let tail = List.tl xs0 in
+  tail >>= List.fold_left ~init:head ~f:begin fun x y ->
+    Option.both x (Some y) >>= d0.fwd
+  end
+
+let foldr d0 xs0 =
+  let init = List.take xs0 (List.length xs0 - 1) |> Option.some in
+  let last = List.last xs0 in
+  init >>= List.fold_right ~init:last ~f:begin fun x y -> 
+    Option.both (Some x) y >>= d0.fwd
+  end
+
+let foldl d0 =
+  { fwd = (function [] -> None | xs0 -> foldl d0 xs0);
+    bwd = (function x0 -> unfold ~f:d0.bwd ~init:x0 |> Option.some)
+  }
+
+let foldr d0 =
+  { fwd = (function [] -> None | xs0 -> foldr d0 xs0);
+    bwd = (function x0 -> unfold ~f:d0.bwd ~init:x0 |> Option.some)
+  }
+
 let fst d0 =
   { fwd = (function (x0, _) -> Some x0);
-    bwd = (function x0 -> d0.bwd () >>| fun x1 -> (x0, x1));
+    bwd = (function x0 -> d0.bwd () >>| fun x1 -> (x0, x1))
   }
+
 let snd d0 =
   { fwd = (function (_, x0) -> Some x0);
-    bwd = (function x0 -> d0.bwd () >>| fun x1 -> (x1, x0));
+    bwd = (function x0 -> d0.bwd () >>| fun x1 -> (x1, x0))
   }
 
 let some =
   { fwd = (function x0 -> Some (Some x0));
-    bwd = (function Some x0 -> Some x0 | None -> None);
+    bwd = (function Some x0 -> Some x0 | None -> None)
   }
   
 let none =
   { fwd = (function _ -> None);
-    bwd = (function Some _ -> None | None -> Some ());
+    bwd = (function Some _ -> None | None -> Some ())
   }
 
 let string =
   { fwd = (function x0 -> Some (String.of_char_list x0));
-    bwd = (function x0 -> Some (String.to_list x0));
+    bwd = (function x0 -> Some (String.to_list x0))
   }
 
 let integer =
   { fwd = (function x0 -> try Some (int_of_string x0) with Failure _ -> None);
-    bwd = (function x0 -> try Some (string_of_int x0) with Failure _ -> None);
+    bwd = (function x0 -> try Some (string_of_int x0) with Failure _ -> None)
   }
 
 let boolean =
   { fwd = (function x0 -> try Some (bool_of_string x0) with Invalid_argument _ -> None);
-    bwd = (function x0 -> try Some (string_of_bool x0) with Invalid_argument _ -> None);
+    bwd = (function x0 -> try Some (string_of_bool x0) with Invalid_argument _ -> None)
   }
