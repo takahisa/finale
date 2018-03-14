@@ -86,7 +86,7 @@ let (~&) p0 =
     | None ->
       None
 
-let char =
+let any =
   fun r0 ->
     try
       Some (Lazy_stream.tail r0, Lazy_stream.head r0)

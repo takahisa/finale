@@ -83,7 +83,7 @@ let (~&) p0 =
     | None ->
       None
 
-let char =
+let any =
   fun x0 ->
     return (String.make 1 x0)
 

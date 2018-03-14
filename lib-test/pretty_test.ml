@@ -28,19 +28,19 @@ open Finale.Pretty
 
 module Make (Pretty: PRETTY) = struct
   let tt = "Pretty" >::: [
-      "char" >:: begin fun _ ->
-        assert_equal (Some "f") @@ print char 'f'
+      "any" >:: begin fun _ ->
+        assert_equal (Some "f") @@ print any 'f'
       end;
       "(<|>)" >:: begin fun _ ->
-        let a = subset ((=) 'a') <$> char in
-        let b = subset ((=) 'b') <$> char in
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
         assert_equal (Some "a") @@ print (a <|> b) 'a';
         assert_equal (Some "b") @@ print (a <|> b) 'b';
         assert_equal None @@ print (a <|> b) 'c'
       end;
       "(<*>)" >:: begin fun _ ->
-        let a = subset ((=) 'a') <$> char in
-        let b = subset ((=) 'b') <$> char in
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
         assert_equal (Some "ab") @@ print (a <*> b) ('a', 'b');
         assert_equal None @@ print (a <*> b) ('a', 'c');
         assert_equal None @@ print (a <*> b) ('c', 'b');
@@ -56,15 +56,15 @@ module Make (Pretty: PRETTY) = struct
         assert_equal None @@ print (pure 42) 24
       end;
       "(~!)" >:: begin fun _ ->
-        let a = element 'a' <$> char in
-        let b = element 'b' <$> char in
+        let a = element 'a' <$> any in
+        let b = element 'b' <$> any in
         assert_equal (Some "") @@ print (~&a) ();
         assert_equal (Some "") @@ print (~&b) ();
         assert_equal None @@ print ~&fail ()
       end;
       "(~&)" >:: begin fun _ ->
-        let a = element 'a' <$> char in
-        let b = element 'b' <$> char in
+        let a = element 'a' <$> any in
+        let b = element 'b' <$> any in
         assert_equal (Some "") @@ print (~&a) ();
         assert_equal (Some "") @@ print (~&b) ();
         assert_equal None @@ print ~&fail ()

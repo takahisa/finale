@@ -30,7 +30,7 @@ module type S = sig
   val skip: 'a syntax -> unit syntax
   val (~!): unit syntax -> unit syntax
   val (~&): unit syntax -> unit syntax
-  val char: char syntax
+  val any: char syntax
 end
 
 module type PARSER = sig

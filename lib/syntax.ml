@@ -73,9 +73,9 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
       print = (fun () -> Pretty.((~&) @@ p0.print ()))
     }
 
-  let char =
-    { parse = (fun () -> Parser.char);
-      print = (fun () -> Pretty.char)
+  let any =
+    { parse = (fun () -> Parser.any);
+      print = (fun () -> Pretty.any)
     }
 
   let print p = Pretty.print (p.print ())

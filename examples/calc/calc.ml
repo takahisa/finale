@@ -66,13 +66,13 @@ module Calc (Pretty: Syntax.PRETTY) (Parser: Syntax.PARSER) = struct
   include S
   include C
 
-  let lp = element '(' <$> char
-  let rp = element ')' <$> char
+  let lp = element '(' <$> any
+  let rp = element ')' <$> any
 
-  let add = element '+' <$> char
-  let sub = element '-' <$> char
-  let mul = element '*' <$> char
-  let div = element '/' <$> char
+  let add = element '+' <$> any
+  let sub = element '-' <$> any
+  let mul = element '*' <$> any
+  let div = element '/' <$> any
 
   let num = compose string integer <$> rep1 digit
   let exp = fix @@ fun exp ->

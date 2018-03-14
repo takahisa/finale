@@ -65,13 +65,13 @@ module Make (Syntax: Syntax_intf.S) = struct
 
   let text z =
     let n = String.length z in
-    compose string (element z) <$> count n char
+    compose string (element z) <$> count n any
 
-  let lower = subset Char.is_lowercase <$> char
-  let upper = subset Char.is_uppercase <$> char
-  let digit = subset Char.is_digit <$> char
-  let alpha = subset Char.is_alpha <$> char
-  let space = skip (subset Char.is_whitespace <$> char)
+  let lower = subset Char.is_lowercase <$> any
+  let upper = subset Char.is_uppercase <$> any
+  let digit = subset Char.is_digit <$> any
+  let alpha = subset Char.is_alpha <$> any
+  let space = skip (subset Char.is_whitespace <$> any)
   let spaces0 = skip (rep0 space)
-  let spaces1 = ((element ' ' <$> char) *> skip (rep0 space)) <|> skip (rep1 space)
+  let spaces1 = ((element ' ' <$> any) *> skip (rep0 space)) <|> skip (rep1 space)
 end

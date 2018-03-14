@@ -30,21 +30,21 @@ module Make (PARSER: PARSER) = struct
   open Parser
 
   let tt = "Parser" >::: [
-      "char" >:: begin fun _ ->
-        assert_equal (Some 'f') @@ parse char "foo";
-        assert_equal (Some 'b') @@ parse char "bar";
-        assert_equal None @@ parse char ""
+      "any" >:: begin fun _ ->
+        assert_equal (Some 'f') @@ parse any "foo";
+        assert_equal (Some 'b') @@ parse any "bar";
+        assert_equal None @@ parse any ""
       end;
       "(<|>)" >:: begin fun _ ->
-        let a = subset ((=) 'a') <$> char in
-        let b = subset ((=) 'b') <$> char in
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
         assert_equal (Some 'a') @@ parse (a <|> b) "a";
         assert_equal (Some 'a') @@ parse (b <|> a) "a";
         assert_equal None @@ parse (a <|> b) "c"
       end;
       "(<*>)" >:: begin fun _ ->
-        let a = subset ((=) 'a') <$> char in
-        let b = subset ((=) 'b') <$> char in
+        let a = subset ((=) 'a') <$> any in
+        let b = subset ((=) 'b') <$> any in
         assert_equal (Some ('a', 'b')) @@ parse (a <*> b) "ab";
         assert_equal None @@ parse (a <*> b) "ac";
         assert_equal None @@ parse (a <*> b) "cb";
@@ -59,18 +59,18 @@ module Make (PARSER: PARSER) = struct
       "pure" >:: begin fun _ ->
         assert_equal (Some ()) @@ parse (pure ()) "foo";
         assert_equal (Some ()) @@ parse (pure ()) "";
-        assert_equal (Some ('a', 'b')) @@ parse (pure 'a' <*> char) "bar";
-        assert_equal (Some ('b', 'b')) @@ parse (pure 'b' <*> char) "bar"
+        assert_equal (Some ('a', 'b')) @@ parse (pure 'a' <*> any) "bar";
+        assert_equal (Some ('b', 'b')) @@ parse (pure 'b' <*> any) "bar"
       end;
       "(~!)" >:: begin fun _ ->
         assert_equal (Some ()) @@ parse (~!fail) "bar";
-        assert_equal (Some ((), 'b')) @@ parse (~!fail <*> char) "bar";
+        assert_equal (Some ((), 'b')) @@ parse (~!fail <*> any) "bar";
         assert_equal None @@ parse (~!(pure ())) "bar";
       end;
       "(~&)" >:: begin fun _ ->
         assert_equal None @@ parse (~&fail) "bar";
         assert_equal (Some ()) @@ parse (~&(pure ())) "bar";
-        assert_equal (Some ((), 'b')) @@ parse (~&(pure ()) <*> char) "bar";
+        assert_equal (Some ((), 'b')) @@ parse (~&(pure ()) <*> any) "bar";
       end
     ]
 end

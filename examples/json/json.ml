@@ -58,22 +58,22 @@ module Json (Pretty: Syntax.PRETTY) (Parser: Syntax.PARSER) = struct
   module C = Combinator.Make (S)
   include S
   include C
-  let lbracket = (element '[' <$> char) <* spaces0
-  let rbracket = (element ']' <$> char) <* spaces0
-  let lbrace = (element '{' <$> char) <* spaces0
-  let rbrace = (element '}' <$> char) <* spaces0
-  let colon = (element ':'  <$> char) <* spaces0
-  let comma = (element ','  <$> char) <* spaces0
-  let quote = (element '"'  <$> char)
+  let lbracket = (element '[' <$> any) <* spaces0
+  let rbracket = (element ']' <$> any) <* spaces0
+  let lbrace = (element '{' <$> any) <* spaces0
+  let rbrace = (element '}' <$> any) <* spaces0
+  let colon = (element ':'  <$> any) <* spaces0
+  let comma = (element ','  <$> any) <* spaces0
+  let quote = (element '"'  <$> any)
 
   let text z =
     let n = String.length z in
-    (compose string (element z) <$> count n char) <* spaces0
+    (compose string (element z) <$> count n any) <* spaces0
   
   let jstring _ =
     jstringE <$> 
       (between quote quote
-         (string <$> rep0 (subset ((<>) '"') <$> char)))
+         (string <$> rep0 (subset ((<>) '"') <$> any)))
     <* spaces0
 
   let jnumber _ =
