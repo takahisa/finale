@@ -19,5 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include Syntax_intf.PARSER with type 'a parser = char Lazy_stream.t -> (char Lazy_stream.t * 'a) option
+type 'a token = { lexeme: 'a; position: int }
+type 'a parser = char token Lazy_stream.t -> (char token Lazy_stream.t * 'a) option 
+include Syntax_intf.PARSER with type 'a parser := 'a parser
 
+module Longest_match: Syntax_intf.PARSER with type 'a parser = 'a parser
