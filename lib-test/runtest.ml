@@ -22,24 +22,22 @@
 open OUnit2
 open Finale
 
-module StandardParser_test = Parser_test.Make(Parser)
-module StandardPretty_test = Pretty_test.Make(Pretty)
-module Syntax_test = struct
-  module Syntax = Syntax.Make (Pretty) (Parser)
-  let tt = "Syntax" >::: [
-      (let module M = Parser_test.Make(Syntax) in M.tt);
-      (let module M = Pretty_test.Make(Syntax) in M.tt);
-  ]
-end
+let tt =
+  "Finale" >:::
+    [ Lazy_stream_test.tt;
+      Iso_test.tt;
+      Iso_partial_test.tt;
+      (let module Pretty_test = Pretty_test.Make (Pretty) in Pretty_test.tt);
+      (let module Parser_test = Parser_test.Make (Parser) in Parser_test.tt);
+      (let module Parser_test = Parser_test.Make (Parser.Longest_match) in Parser_test.tt);
+      (let module Combinator_test = Combinator_test.Make (Pretty) (Parser) in Combinator_test.tt);
+      ("Syntax" >::: begin
+        let module F = Syntax.Make (Pretty) (Parser) in
+        let module Pretty_test = Pretty_test.Make (F) in
+        let module Parser_test = Parser_test.Make (F) in
+        [ Pretty_test.tt; Parser_test.tt ]
+      end);
+    ]
 
 let _ =
-  run_test_tt_main begin
-    "Finale" >::: [
-      Iso_test.tt;
-      Lazy_stream_test.tt;
-      StandardPretty_test.tt;
-      StandardParser_test.tt;
-      Syntax_test.tt;
-      Combinator_test.tt
-    ]
-  end
+  run_test_tt_main tt

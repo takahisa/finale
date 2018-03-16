@@ -26,9 +26,10 @@ val element: ?compare:('a -> 'a -> int) -> 'a -> ('a, unit) iso
 
 val singleton: ('a, 'a list) iso
 val cons: ('a * 'a list, 'a list) iso
+val snoc: ('a list * 'a, 'a list) iso
 val nil: (unit, 'a list) iso
-val foldl: ('a * 'a, 'a) iso -> ('a list, 'a) iso
-val foldr: ('a * 'a, 'a) iso -> ('a list, 'a) iso
+val foldl: ('a * 'b, 'a) iso -> ('a * 'b list, 'a) iso
+val foldr: ('a * 'b, 'b) iso -> ('a list * 'b, 'b) iso
 
 val fst: ('b, unit) iso -> ('a * 'b, 'a) iso
 val snd: ('b, unit) iso -> ('b * 'a, 'a) iso

@@ -23,15 +23,23 @@ open OUnit2
 open Finale
 open Finale.Lazy_stream
 
-let tt = "Lazy_stream" >::: [
-    "head" >:: begin fun _ ->
-      assert_equal 'b' @@ head (of_string "bar");
-      assert_raises Empty @@ fun () -> head empty
-    end;
-    "tail" >:: begin fun _ ->
-      assert_equal 'a' @@ head (tail (of_string "bar"));
-      assert_equal 'r' @@ head (tail (tail (of_string "bar")));
-      assert_raises Empty @@ fun () -> ignore (head (tail (tail (tail (of_string "bar")))));
-      assert_raises Empty @@ fun () -> ignore (tail empty)
-    end;
+let tt =
+  "Lazy_stream" >:::
+    [ "from" >:: begin fun _ ->
+         let r = from (fun i -> Some i) in
+         assert_equal 0 @@ head r;
+         assert_equal 0 @@ head r;
+         assert_equal 1 @@ head @@ tail r;
+         assert_equal 2 @@ head @@ tail @@ tail @@ r;
+      end;
+      "head" >:: begin fun _ ->
+        assert_equal 'f' @@ head (of_string "foo");
+        assert_equal 'b' @@ head (of_string "bar");
+        assert_raises Lazy_stream.Empty @@ fun () -> head (of_string "")
+      end;
+      "tail" >:: begin fun _ ->
+        assert_equal 'o' @@ head (tail (of_string "foo"));
+        assert_equal 'a' @@ head (tail (of_string "bar"));
+        assert_raises Lazy_stream.Empty @@ fun () -> tail (of_string "")
+      end;
   ]

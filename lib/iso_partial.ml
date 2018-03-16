@@ -43,40 +43,50 @@ let cons =
     bwd = (function (x0 :: xs0) -> Some (x0, xs0) | _ -> None)
   }
 
+let snoc =
+  let init xs = List.take xs (List.length xs - 1) in
+  let last xs = List.last_exn xs in
+  { fwd = (function (xs0, x0) -> Some (xs0 @ [x0]));
+    bwd = (function [] -> None | xs0 -> Some (init xs0, last xs0))
+  }
+
 let nil =
   { fwd = (function () -> Some []);
     bwd = (function [] -> Some () | _ -> None)
   }
 
-let rec unfold ~f ~init =
+let rec unfoldl ~f init acc =
   match f init with
-  | Some (x0, init) ->
-    x0 :: unfold ~f ~init
+  | Some (x0, x1) -> 
+    unfoldl ~f x0 (x1 :: acc)
   | None ->
-    init :: []
+    (init, acc)
 
-let foldl d0 xs0 =
-  let head = List.hd xs0 in
-  let tail = List.tl xs0 in
-  tail >>= List.fold_left ~init:head ~f:begin fun x y ->
-    Option.both x (Some y) >>= d0.fwd
+let rec unfoldr ~f init acc =
+  match f init with
+  | Some (x0, x1) -> 
+    unfoldr ~f x1 (x0 :: acc)
+  | None ->
+    (List.rev acc, init)
+
+let foldl ~f ~init:x0 xs0 =
+  xs0 >>= List.fold_left ~init:x0 ~f:begin fun x y ->
+    Option.both x (Some y) >>= f
   end
 
-let foldr d0 xs0 =
-  let init = List.take xs0 (List.length xs0 - 1) |> Option.some in
-  let last = List.last xs0 in
-  init >>= List.fold_right ~init:last ~f:begin fun x y -> 
-    Option.both (Some x) y >>= d0.fwd
+let foldr ~f ~init:x0 xs0 =
+  xs0 >>= List.fold_right ~init:x0 ~f:begin fun x y -> 
+    Option.both (Some x) y >>= f
   end
 
 let foldl d0 =
-  { fwd = (function [] -> None | xs0 -> foldl d0 xs0);
-    bwd = (function x0 -> unfold ~f:d0.bwd ~init:x0 |> Option.some)
+  { fwd = (function (x0, xs0) -> foldl ~f:d0.fwd ~init:(Some x0) (Some xs0));
+    bwd = (function xs0 -> unfoldl ~f:d0.bwd xs0 [] |> Option.some)
   }
 
 let foldr d0 =
-  { fwd = (function [] -> None | xs0 -> foldr d0 xs0);
-    bwd = (function x0 -> unfold ~f:d0.bwd ~init:x0 |> Option.some)
+  { fwd = (function (xs0, x0) -> foldr ~f:d0.fwd ~init:(Some x0) (Some xs0));
+    bwd = (function xs0 -> unfoldr ~f:d0.bwd xs0 [] |> Option.some)
   }
 
 let fst d0 =
@@ -95,7 +105,7 @@ let some =
   }
   
 let none =
-  { fwd = (function _ -> None);
+  { fwd = (function _ -> Some None);
     bwd = (function Some _ -> None | None -> Some ())
   }
 
