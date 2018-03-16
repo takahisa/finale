@@ -32,6 +32,27 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
   module Combinator = Combinator.Make (Combinator_base)
   open Combinator_base
   open Combinator
+
+  type 'a exp =
+    | IntE: int -> int exp
+    | AddE: int exp * int exp -> int exp
+    | SubE: int exp * int exp -> int exp
+        
+  let intE =
+    { fwd = (function n -> Some (IntE n));
+      bwd = (function IntE n -> Some n | _ -> None);
+    }
+
+  let addE =
+    { fwd = (function (e0, e1) -> Some (AddE (e0, e1)));
+      bwd = (function AddE (e0, e1) -> Some (e0, e1) | _ -> None);
+    }
+
+  let subE =
+    { fwd = (function (e0, e1) -> Some (SubE (e0, e1)));
+      bwd = (function SubE (e0, e1) -> Some (e0, e1) | _ -> None);
+    }
+
   
   let tt = 
     "Combinator" >::: 
@@ -147,6 +168,24 @@ module Make (Pretty: PRETTY) (Parser: PARSER) = struct
           assert_equal None @@ parse (sep_end_by1 ~delimiter:comma any) "";
           assert_equal (Some ['b']) @@ parse (sep_end_by1 ~delimiter:comma any) "b";
           assert_equal (Some ['b']) @@ parse (sep_end_by1 ~delimiter:comma any) "b,";
+        end;
+        "chainl1" >:: begin fun _ ->
+          let p_int = compose (compose string integer) intE <$> rep1 digit in
+          let p_add = chainl1 addE (char '+') p_int in
+          let exp = AddE (AddE (IntE 1, IntE 2), IntE 3) in
+          assert_equal (Some exp)      @@ parse p_add "1+2+3";
+          assert_equal (Some "1+2+3")  @@ print p_add exp;
+          assert_equal (Some (IntE 1)) @@ parse p_add "1";
+          assert_equal (Some "1")      @@ print p_add (IntE 1);
+        end;
+        "chainr1" >:: begin fun _ ->
+          let p_int = compose (compose string integer) intE <$> rep1 digit in
+          let p_add = chainr1 addE (char '+') p_int in
+          let exp = AddE (IntE 1, AddE (IntE 2, IntE 3)) in
+          assert_equal (Some exp)      @@ parse p_add "1+2+3";
+          assert_equal (Some "1+2+3")  @@ print p_add exp;
+          assert_equal (Some (IntE 1)) @@ parse p_add "1";
+          assert_equal (Some "1")      @@ print p_add (IntE 1);
         end;
         "text" >:: begin fun _ ->
           assert_equal (Some "foo") @@ print (text "foo") ();

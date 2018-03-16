@@ -66,6 +66,12 @@ module Make (S: Syntax_intf.S) = struct
   let sep_end_by0 ~delimiter:p0 p1 =
     sep_by0 p0 p1 <* opt p0
 
+  let chainl1 d0 p0 p1 =
+    foldl d0 <$> (p1 <*> rep0 (p0 *> p1))
+
+  let chainr1 d0 p0 p1 =
+    compose (compose cons (inverse snoc)) (foldr d0)  <$> (p1 <*> rep0 (p0 *> p1))
+
   let between p0 p1 p2 =
     p0 *> p2 <* p1
 

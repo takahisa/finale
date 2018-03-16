@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
+open Iso
+
 module type S = sig
   type 'a syntax
   val ( *>): unit syntax -> 'a syntax -> 'a syntax
@@ -35,6 +37,8 @@ module type S = sig
   val end_by1: delimiter:unit syntax -> 'a syntax -> 'a list syntax
   val sep_end_by0: delimiter:unit syntax -> 'a syntax -> 'a list syntax
   val sep_end_by1: delimiter:unit syntax -> 'a syntax -> 'a list syntax
+  val chainl1: ('a * 'a, 'a) iso -> unit syntax -> 'a syntax -> 'a syntax
+  val chainr1: ('a * 'a, 'a) iso -> unit syntax -> 'a syntax -> 'a syntax
   val between: unit syntax -> unit syntax -> 'a syntax -> 'a syntax
   val text: string -> unit syntax
   val char: char -> unit syntax
