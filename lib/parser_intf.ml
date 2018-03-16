@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include Parser_intf.S
-
-module Longest_match
-  : Parser_intf.S with type 'a syntax = 'a syntax
+module type S = sig
+  include Syntax_intf.S
+  val parse: 'a syntax -> string -> 'a option
+end

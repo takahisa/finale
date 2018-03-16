@@ -21,11 +21,9 @@
  *)
 include (module type of Syntax_intf)
 
-module Make (Pretty: PRETTY) (Parser: PARSER) : sig
-  type 'a parser = 'a Parser.parser
-  type 'a pretty = 'a Pretty.pretty
+module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) : sig
   include Syntax_intf.S
-  val print: 'a syntax -> 'a -> string option
-  val parse: 'a syntax -> string -> 'a option
+  include Pretty_intf.S with type 'a syntax := 'a syntax
+  include Parser_intf.S with type 'a syntax := 'a syntax
   val apply: 'a syntax -> (string, 'a) Iso.iso
 end

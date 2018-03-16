@@ -32,14 +32,3 @@ module type S = sig
   val opt: unit syntax -> unit syntax
   val any: char syntax
 end
-
-module type PARSER = sig
-  include S
-  type 'a parser
-  val parse: 'a syntax -> string -> 'a option
-end
-module type PRETTY = sig
-  include S
-  type 'a pretty
-  val print: 'a syntax -> 'a -> string option
-end

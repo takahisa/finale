@@ -26,7 +26,7 @@ open Finale.Iso_partial
 open Finale.Syntax
 open Finale.Pretty
 
-module Make (Pretty: PRETTY) = struct
+module Make (Pretty: Pretty_intf.S) = struct
   let tt = 
     "Pretty" >:::
       [ "any" >:: begin fun _ ->

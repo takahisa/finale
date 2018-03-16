@@ -27,7 +27,7 @@ open Finale.Syntax
 open Finale.Iso
 open Finale.Iso_partial
 
-module Make (Pretty: PRETTY) (Parser: PARSER) = struct
+module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
   module Combinator_base = Syntax.Make (Pretty) (Parser)
   module Combinator = Combinator.Make (Combinator_base)
   open Combinator_base

@@ -22,8 +22,7 @@
 open Core
 open Core.Option
 
-type 'a pretty = 'a -> string option
-type 'a syntax = 'a pretty
+type 'a syntax = 'a -> string option
 let run = (@@)
 let fwd = Iso.fwd
 let bwd = Iso.bwd

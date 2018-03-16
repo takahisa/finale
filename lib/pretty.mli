@@ -19,5 +19,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-include Syntax_intf.PRETTY with type 'a pretty = 'a -> string option
-
+include Pretty_intf.S
