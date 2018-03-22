@@ -56,9 +56,9 @@ module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
       print = (fun () -> Pretty.fail)
     }
 
-  let pure ?(compare = Pervasives.compare) x0 =
-    { parse = (fun () -> Parser.pure ~compare x0);
-      print = (fun () -> Pretty.pure ~compare x0)
+  let pure (=) x0 =
+    { parse = (fun () -> Parser.pure (=) x0);
+      print = (fun () -> Pretty.pure (=) x0)
     }
 
   let (~!) p0 =

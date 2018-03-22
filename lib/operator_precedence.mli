@@ -19,26 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *)
-open OUnit2
-open Finale
+open Iso
 
-let tt =
-  "Finale" >:::
-    [ Lazy_stream_test.tt;
-      Iso_test.tt;
-      Iso_partial_test.tt;
-      (let module Pretty_test = Pretty_test.Make (Pretty) in Pretty_test.tt);
-      (let module Parser_test = Parser_test.Make (Parser) in Parser_test.tt);
-      (let module Parser_test = Parser_test.Make (Parser.Longest_match) in Parser_test.tt);
-      (let module Combinator_test = Combinator_test.Make (Pretty) (Parser) in Combinator_test.tt);
-      ("Syntax" >::: begin
-        let module F = Syntax.Make (Pretty) (Parser) in
-        let module Pretty_test = Pretty_test.Make (F) in
-        let module Parser_test = Parser_test.Make (F) in
-        [ Pretty_test.tt; Parser_test.tt ]
-      end);
-      (let module Operator_precedence_test = Operator_precedence_test.Make (Pretty) (Parser) in Operator_precedence_test.tt)
-    ]
+module Make (Syntax: Syntax_intf.S) : sig
+  open Syntax
+  exception Not_supported
+  type 'a operator
+  type 'a operator_spec = 'a operator list
 
-let _ =
-  run_test_tt_main tt
+   val infixlop: prec:int -> ('a * 'a, 'a) iso -> unit syntax -> 'a operator
+   val infixrop: prec:int -> ('a * 'a, 'a) iso -> unit syntax -> 'a operator
+   val prefixop: prec:int -> ('a, 'a) iso -> unit syntax -> 'a operator
+   val suffixop: prec:int -> ('a, 'a) iso -> unit syntax -> 'a operator
+   val operator: 'a operator_spec -> innermost:'a syntax -> 'a syntax
+end

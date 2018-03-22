@@ -57,10 +57,9 @@ let fix f =
 let fail =
   fun _ -> None
 
-let pure ?(compare = Pervasives.compare) =
+let pure (=) =
   fun x0 x1 ->
-    if (compare x0 x1 = 0) then Some ""
-                           else None
+    Option.some_if (x0 = x1) ""
 
 let (~!) p0 =
   fun () ->

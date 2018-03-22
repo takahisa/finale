@@ -58,20 +58,20 @@ module Make (Parser: Parser_intf.S) = struct
           assert_equal None @@ parse fail ""
         end;
         "pure" >:: begin fun _ ->
-          assert_equal (Some ()) @@ parse (pure ()) "foo";
-          assert_equal (Some ()) @@ parse (pure ()) "";
-          assert_equal (Some ('a', 'b')) @@ parse (pure 'a' <*> any) "bar";
-          assert_equal (Some ('b', 'b')) @@ parse (pure 'b' <*> any) "bar"
+          assert_equal (Some ()) @@ parse (pure (=) ()) "foo";
+          assert_equal (Some ()) @@ parse (pure (=) ()) "";
+          assert_equal (Some ('a', 'b')) @@ parse (pure (=) 'a' <*> any) "bar";
+          assert_equal (Some ('b', 'b')) @@ parse (pure (=) 'b' <*> any) "bar"
         end;
         "(~!)" >:: begin fun _ ->
           assert_equal (Some ()) @@ parse (~!fail) "bar";
           assert_equal (Some ((), 'b')) @@ parse (~!fail <*> any) "bar";
-          assert_equal None @@ parse (~!(pure ())) "bar";
+          assert_equal None @@ parse (~!(pure (=) ())) "bar";
         end;
         "(~&)" >:: begin fun _ ->
           assert_equal None @@ parse (~&fail) "bar";
-          assert_equal (Some ()) @@ parse (~&(pure ())) "bar";
-          assert_equal (Some ((), 'b')) @@ parse (~&(pure ()) <*> any) "bar";
+          assert_equal (Some ()) @@ parse (~&(pure (=) ())) "bar";
+          assert_equal (Some ((), 'b')) @@ parse (~&(pure (=) ()) <*> any) "bar";
         end
       ]
 end

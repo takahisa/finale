@@ -31,28 +31,28 @@ module Make (S: Syntax_intf.S) = struct
   let ( <*) p0 p1 = fst (element ()) <$> (p0 <*> p1)
 
   let sequence ps = 
-    List.fold_right ~f:(fun hd tl -> cons <$> (hd <*> tl)) ~init:(pure []) ps
+    List.fold_right ~f:(fun hd tl -> cons <$> (hd <*> tl)) ~init:(pure (=) []) ps
 
   let choice ps =
     List.fold_right ~f:(<|>) ~init:fail ps
 
   let option p0 =
-    (some <$> p0) <|> (pure None)
+    (some <$> p0) <|> (pure (=) None)
 
   let count n0 p0 =
     sequence @@ List.init n0 ~f:(Fn.const p0)
 
   let rep1 p0 =
-    fix (fun fix -> cons <$> (p0 <*> (fix <|> pure [])))
+    fix (fun fix -> cons <$> (p0 <*> (fix <|> pure (=) [])))
 
   let rep0 p0 =
-    rep1 p0 <|> pure []
+    rep1 p0 <|> pure (=) []
 
   let sep_by1 ~delimiter:p0 p1 =
     cons <$> (p1 <*> rep0 (p0 *> p1))
 
   let sep_by0 ~delimiter:p0 p1 =
-    sep_by1 p0 p1 <|> pure []
+    sep_by1 p0 p1 <|> pure (=) []
 
   let end_by1 ~delimiter:p0 p1 =
     rep1 (p1 <* p0)

@@ -52,9 +52,9 @@ module Make (Pretty: Pretty_intf.S) = struct
           assert_equal None @@ print fail 42
         end;
         "pure" >:: begin fun _ ->
-          assert_equal (Some "") @@ print (pure ()) ();
-          assert_equal (Some "") @@ print (pure 42) 42;
-          assert_equal None @@ print (pure 42) 24
+          assert_equal (Some "") @@ print (pure (=) ()) ();
+          assert_equal (Some "") @@ print (pure (=) 42) 42;
+          assert_equal None @@ print (pure (=) 42) 24
         end;
         "(~!)" >:: begin fun _ ->
           let a = element 'a' <$> any in

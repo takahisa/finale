@@ -26,7 +26,7 @@ module type S = sig
   val (<*>): 'a syntax -> 'b syntax -> ('a * 'b) syntax
   val fix: ('a syntax -> 'a syntax) -> 'a syntax
   val fail: 'a syntax
-  val pure: ?compare:('a -> 'a -> int) -> 'a -> 'a syntax
+  val pure: ('a -> 'a -> bool) -> 'a -> 'a syntax
   val (~!): unit syntax -> unit syntax
   val (~&): unit syntax -> unit syntax
   val opt: unit syntax -> unit syntax

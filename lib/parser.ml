@@ -81,7 +81,7 @@ let fix f =
 let fail =
   fun _ -> None
 
-let pure ?(compare = Pervasives.compare) x0 =
+let pure (=) x0 =
   fun r0 ->
     return (r0, x0)
 
