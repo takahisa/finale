@@ -57,7 +57,7 @@ let jbooleanE =
     bwd = (function JBoolean x0 -> Some x0 | _ -> None)
   }    
 
-module Json (Pretty: Syntax.PRETTY) (Parser: Syntax.PARSER) = struct
+module Json (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
   module Combinator_base = Syntax.Make (Pretty) (Parser)
   module Combinator = Combinator.Make (Combinator_base)
 
@@ -81,8 +81,8 @@ module Json (Pretty: Syntax.PRETTY) (Parser: Syntax.PARSER) = struct
     <* spaces
 
   let jboolean _ =
-        ((jbooleanE <$> (text "true"  *> pure true))
-    <|> ((jbooleanE <$> (text "false" *> pure false))))
+        ((jbooleanE <$> (text "true"  *> pure (=) true))
+    <|> ((jbooleanE <$> (text "false" *> pure (=) false))))
     <* spaces
 
   let jobject jvalue =
@@ -124,5 +124,5 @@ let _ =
   | Some (_, z) ->
     print_endline z
   | None ->
-    print_endline "Failure"
+    print_endline "*failure*"
 
