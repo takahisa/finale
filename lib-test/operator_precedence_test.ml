@@ -42,8 +42,8 @@ module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
     | MulE: int exp * int exp -> int exp
     | DivE: int exp * int exp -> int exp
     | IntE: int -> int exp
-    | NegE: int exp -> int exp
-    | FactorialE: int exp -> int exp
+    | IncE: int exp -> int exp
+    | DecE: int exp -> int exp
         
   let addE =
     { fwd = (function (e0, e1) -> Some (AddE (e0, e1)));
@@ -65,9 +65,14 @@ module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
       bwd = (function DivE (e0, e1) -> Some (e0, e1) | _ -> None)
     }
 
-  let negE =
-    { fwd = (function e0 -> Some (NegE e0));
-      bwd = (function NegE e0 -> Some e0 | _ -> None)
+  let incE =
+    { fwd = (function e0 -> Some (IncE e0));
+      bwd = (function IncE e0 -> Some e0 | _ -> None)
+    }
+
+  let decE =
+    { fwd = (function e0 -> Some (DecE e0));
+      bwd = (function DecE e0 -> Some e0 | _ -> None)
     }
 
   let intE =
@@ -75,60 +80,82 @@ module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
       bwd = (function IntE n0 -> Some n0 | _ -> None)
     }
 
-  let factorialE =
-    { fwd = (function e0 -> Some (FactorialE e0));
-      bwd = (function FactorialE e0 -> Some e0| _ -> None)
-    }
-
-  let operator_spec =
-    [ (infixlop ~prec:20 addE (char '+'));
-      (infixlop ~prec:20 subE (char '-'));
-      (infixlop ~prec:40 mulE (char '*'));
-      (infixlop ~prec:40 divE (char '/'));
-      (prefixop ~prec:90 negE (char '-'));
-      (suffixop ~prec:90 factorialE (char '!'));
-    ]
-
-  let num = (compose string integer <$> rep1 digit)
+  let lp = char '('
+  let rp = char ')'
+  let num = compose string integer <$> rep1 digit
   let exp = fix @@ fun exp ->
-    operator operator_spec ~innermost:(intE <$> num <|> between (char '(') (char ')') exp)
+    operator 
+      [ infixlop ~prec:50 addE (text "+");
+        infixlop ~prec:50 subE (text "-");
+        infixlop ~prec:40 mulE (text "*");
+        infixlop ~prec:40 divE (text "/");
+        prefixop ~prec:10 incE (text "++");
+        prefixop ~prec:10 decE (text "--");
+        suffixop ~prec:10 incE (text "++");
+        suffixop ~prec:10 decE (text "--");
+      ] ~innermost:((intE <$> num) <|> between lp rp exp)
 
-  let rec eval = function
-    | IntE n0 -> n0
-    | NegE e0 -> -(eval e0)
-    | AddE (e0, e1) -> eval e0 + eval e1
-    | SubE (e0, e1) -> eval e0 - eval e1
-    | MulE (e0, e1) -> eval e0 * eval e1
-    | DivE (e0, e1) -> eval e0 / eval e1
-    | FactorialE e0 ->
-      let rec factorial x =
-        if x <= 1 then 1 else factorial (x - 1) * x
-      in factorial (eval e0)
+  let assert_isomorphic syntax (ast, str) =
+    let x0 = parse syntax str in
+    let x1 = print syntax ast >>= parse syntax in
+    let printer ast =
+      match ast >>= print syntax with
+      | Some z -> z
+      | None   -> "*failure*"
+    in
+    assert_equal ~printer (Some ast) x0;
+    assert_equal ~printer (Some ast) x1
 
   let tt = 
-    let case z0 n0 =
-      z0 >:: fun _ ->
-        begin
-          parse exp z0 >>= fun e0 ->
-          print exp e0 >>= fun z1 -> parse exp z1 >>= fun e1 ->
-          assert_equal e0 e1;
-          assert_equal n0 (eval e0);
-          return ()
-        end |> ignore
-    in
-    "Operator_precedence" >::: 
-      [ case "42"      (42);
-        case "(42)"    (42);
-        case "((42))"  (42);
-        case "-42"     (-42);
-        case "42!"     (eval (FactorialE (IntE 42)));
-        case "1+2"     (1+2);
-        case "1-2"     (1-2);
-        case "1*2"     (1*2);
-        case "1/2"     (1/2);
-        case "1+2*3"   (1+2*3);
-        case "(1+2)*3" ((1+2)*3);
-        case "-1+2*3"  ((-1)+2*3);
-        case "1*2+3!"  (1*2+(3*2*1));
+    "Operator_precedence" >:::
+      [ "integer-literal" >:: begin fun _ ->
+          assert_isomorphic exp (IntE 42, "42");
+          assert_isomorphic exp (IntE 42, "(42)");
+          assert_isomorphic exp (IntE 42, "((42))");
+        end;
+        "add-or-sub-expression" >:: begin fun _ ->
+          assert_isomorphic exp (AddE (IntE 1, IntE 2), "1+2");
+          assert_isomorphic exp (AddE (AddE (IntE 1, IntE 2), IntE 3), "1+2+3");
+          assert_isomorphic exp (AddE (AddE (IntE 1, IntE 2), IntE 3), "(1+2)+3");
+          assert_isomorphic exp (AddE (IntE 1, AddE (IntE 2, IntE 3)), "1+(2+3)");
+          assert_isomorphic exp (SubE (IntE 1, IntE 2), "1-2");
+          assert_isomorphic exp (SubE (SubE (IntE 1, IntE 2), IntE 3), "1-2-3");
+          assert_isomorphic exp (SubE (SubE (IntE 1, IntE 2), IntE 3), "(1-2)-3");
+          assert_isomorphic exp (SubE (IntE 1, SubE (IntE 2, IntE 3)), "1-(2-3)");
+          assert_isomorphic exp (SubE (AddE (IntE 1, IntE 2), IntE 3), "1+2-3");
+          assert_isomorphic exp (AddE (SubE (IntE 1, IntE 2), IntE 3), "1-2+3");
+        end;
+        "mul-or-div-expression" >:: begin fun _ ->
+          assert_isomorphic exp (MulE (IntE 1, IntE 2), "1*2");
+          assert_isomorphic exp (MulE (MulE (IntE 1, IntE 2), IntE 3), "1*2*3");
+          assert_isomorphic exp (MulE (MulE (IntE 1, IntE 2), IntE 3), "(1*2)*3");
+          assert_isomorphic exp (MulE (IntE 1, MulE (IntE 2, IntE 3)), "1*(2*3)");
+          assert_isomorphic exp (DivE (IntE 1, IntE 2), "1/2");
+          assert_isomorphic exp (DivE (DivE (IntE 1, IntE 2), IntE 3), "1/2/3");
+          assert_isomorphic exp (DivE (DivE (IntE 1, IntE 2), IntE 3), "(1/2)/3");
+          assert_isomorphic exp (DivE (IntE 1, DivE (IntE 2, IntE 3)), "1/(2/3)");
+          assert_isomorphic exp (DivE (MulE (IntE 1, IntE 2), IntE 3), "1*2/3");
+          assert_isomorphic exp (MulE (DivE (IntE 1, IntE 2), IntE 3), "1/2*3");
+        end;
+        "inc-or-dec-expression" >:: begin fun _ ->
+          assert_isomorphic exp ((IncE (IntE 1)), "++1");
+          assert_isomorphic exp ((IncE (IntE 1)), "1++");
+          assert_isomorphic exp ((DecE (IntE 1)), "--1");
+          assert_isomorphic exp ((DecE (IntE 1)), "1--");
+          assert_isomorphic exp (IncE (IncE (IntE 1)), "++++1");
+          assert_isomorphic exp (IncE (IncE (IntE 1)), "1++++");
+          assert_isomorphic exp (DecE (DecE (IntE 1)), "----1");
+          assert_isomorphic exp (DecE (DecE (IntE 1)), "1----");
+          assert_isomorphic exp (IncE (DecE (IntE 1)), "++--1");
+          assert_isomorphic exp (IncE (DecE (IntE 1)), "1--++");
+          assert_isomorphic exp (DecE (IncE (IntE 1)), "--++1");
+          assert_isomorphic exp (DecE (IncE (IntE 1)), "1++--");
+        end;
+        "arithmetic-expression" >:: begin fun _ ->
+          assert_isomorphic exp (AddE (IntE 1, MulE (IntE 2, IntE 3)), "1+2*3");
+          assert_isomorphic exp (AddE (MulE (IntE 1, IntE 2), IntE 3), "1*2+3");
+          assert_isomorphic exp (AddE (IncE (IntE 1), MulE (IntE 2, IntE 3)), "++1+2*3");
+          assert_isomorphic exp (AddE (MulE (IntE 1, IntE 2), DecE (IntE 3)), "1*2+3--");
+        end
       ]
 end
