@@ -22,14 +22,14 @@
 open Iso
 
 module type S = sig
-  exception Not_supported
-  type 'a operator
-  type 'a operator_spec = 'a operator list
   type 'a syntax
+  type 'a operator_spec = 'a operator list
+   and 'a operator =
+    [ `Infixl of int * ('a * 'a, 'a) iso * unit syntax
+    | `Infixr of int * ('a * 'a, 'a) iso * unit syntax
+    | `Prefix of int * ('a, 'a) iso * unit syntax
+    | `Suffix of int * ('a, 'a) iso * unit syntax
+    ]
 
-   val infixl: prec:int -> ('a * 'a, 'a) iso -> unit syntax -> 'a operator
-   val infixr: prec:int -> ('a * 'a, 'a) iso -> unit syntax -> 'a operator
-   val prefix: prec:int -> ('a, 'a) iso -> unit syntax -> 'a operator
-   val suffix: prec:int -> ('a, 'a) iso -> unit syntax -> 'a operator
    val operator: 'a operator_spec -> innermost:'a syntax -> 'a syntax
 end
