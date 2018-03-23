@@ -21,5 +21,15 @@
  *)
 open Iso
 
-module Make (Syntax: Syntax_intf.S)
-  : Operator_precedence_intf.S with type 'a syntax := 'a Syntax.syntax
+module type S = sig
+  exception Not_supported
+  type 'a operator
+  type 'a operator_spec = 'a operator list
+  type 'a syntax
+
+   val infixl: prec:int -> ('a * 'a, 'a) iso -> unit syntax -> 'a operator
+   val infixr: prec:int -> ('a * 'a, 'a) iso -> unit syntax -> 'a operator
+   val prefix: prec:int -> ('a, 'a) iso -> unit syntax -> 'a operator
+   val suffix: prec:int -> ('a, 'a) iso -> unit syntax -> 'a operator
+   val operator: 'a operator_spec -> innermost:'a syntax -> 'a syntax
+end

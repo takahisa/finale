@@ -71,11 +71,11 @@ module Calc (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
   let num = compose string integer <$> rep1 digit
   let exp = fix @@ fun exp ->
     operator ~innermost:(intE <$> num <|> between lp rp exp)
-      [ infixlop ~prec:50 addE (text "+");
-        infixlop ~prec:50 subE (text "-");
-        infixlop ~prec:30 mulE (text "*");
-        infixlop ~prec:30 divE (text "/");
-        prefixop ~prec:10 negE (text "-")
+      [ infixl ~prec:50 addE (text "+");
+        infixl ~prec:50 subE (text "-");
+        infixl ~prec:30 mulE (text "*");
+        infixl ~prec:30 divE (text "/");
+        prefix ~prec:10 negE (text "-")
       ]
 
   let parse = Combinator_base.parse exp

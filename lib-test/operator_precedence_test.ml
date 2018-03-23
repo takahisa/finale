@@ -85,14 +85,14 @@ module Make (Pretty: Pretty_intf.S) (Parser: Parser_intf.S) = struct
   let num = compose string integer <$> rep1 digit
   let exp = fix @@ fun exp ->
     operator 
-      [ infixlop ~prec:50 addE (text "+");
-        infixlop ~prec:50 subE (text "-");
-        infixlop ~prec:40 mulE (text "*");
-        infixlop ~prec:40 divE (text "/");
-        prefixop ~prec:10 incE (text "++");
-        prefixop ~prec:10 decE (text "--");
-        suffixop ~prec:10 incE (text "++");
-        suffixop ~prec:10 decE (text "--");
+      [ infixl ~prec:50 addE (text "+");
+        infixl ~prec:50 subE (text "-");
+        infixl ~prec:40 mulE (text "*");
+        infixl ~prec:40 divE (text "/");
+        prefix ~prec:10 incE (text "++");
+        prefix ~prec:10 decE (text "--");
+        suffix ~prec:10 incE (text "++");
+        suffix ~prec:10 decE (text "--");
       ] ~innermost:((intE <$> num) <|> between lp rp exp)
 
   let assert_isomorphic syntax (ast, str) =

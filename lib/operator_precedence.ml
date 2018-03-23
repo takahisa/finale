@@ -40,7 +40,7 @@ module Make (Syntax: Syntax_intf.S) = struct
     ]
   type 'a operator_spec = 'a operator list
 
-  let infixl operator_spec p0 ~lhs:p1 ~rhs:p2 =
+  let chainl operator_spec p0 ~lhs:p1 ~rhs:p2 =
     let iso =
       { fwd = (function (x0, (d0, x1)) -> !d0.fwd (x0, x1));
         bwd = (function x0 -> 
@@ -49,7 +49,7 @@ module Make (Syntax: Syntax_intf.S) = struct
       }
     in foldl iso <$> (p1 <*> rep0 (p0 <*> p2))
 
-  let infixr operator_spec p0 ~lhs:p1 ~rhs:p2 =
+  let chainr operator_spec p0 ~lhs:p1 ~rhs:p2 =
     let iso =
       { fwd = (function ((x0, d0), x1) -> !d0.fwd (x0, x1));
         bwd = (function x0 ->
@@ -107,11 +107,11 @@ module Make (Syntax: Syntax_intf.S) = struct
     | infixlop, [] ->
       let op = choice @@
         List.map infixlop ~f:(function `Infixl (_, d0, p0) -> p0 *> pure phys_equal d0) in
-      infixl infixlop op lhs rhs
+      chainl infixlop op lhs rhs
     | [], infixrop ->
       let op = choice @@
         List.map infixrop ~f:(function `Infixr (_, d0, p0) -> p0 *> pure phys_equal d0) in
-      infixr infixrop op lhs rhs
+      chainr infixrop op lhs rhs
     | _ ->
       raise Not_supported
 
@@ -128,12 +128,12 @@ module Make (Syntax: Syntax_intf.S) = struct
     |> List.group ~break:(fun x0 x1 -> operator_prec x0 <> operator_prec x1)
     |> translate ~innermost
 
-  let infixlop ~prec:n0 d0 p0 =
+  let infixl ~prec:n0 d0 p0 =
     `Infixl (n0, ref d0, p0)
-  let infixrop ~prec:n0 d0 p0 =
+  let infixr ~prec:n0 d0 p0 =
     `Infixr (n0, ref d0, p0)
-  let prefixop ~prec:n0 d0 p0 =
+  let prefix ~prec:n0 d0 p0 =
     `Prefix (n0, ref d0, p0)
-  let suffixop ~prec:n0 d0 p0 =
+  let suffix ~prec:n0 d0 p0 =
     `Suffix (n0, ref d0, p0)
 end
