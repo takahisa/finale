@@ -122,7 +122,7 @@ module Make (Syntax: Syntax_intf.S) = struct
     
   let operator operator_spec ~innermost =
     operator_spec
-    |> List.sort ~cmp:(fun x0 x1 ->  operator_prec x1 - operator_prec x0)
+    |> List.sort ~compare:(fun x0 x1 ->  operator_prec x1 - operator_prec x0)
     |> List.group ~break:(fun x0 x1 -> operator_prec x0 <> operator_prec x1)
     |> translate ~innermost
 end
