@@ -1,0 +1,6 @@
+(library
+  (public_name cycle)
+  (name cycle)
+  (libraries base stdio)
+  (modes native byte)
+  (flags :standard -g -linkall))

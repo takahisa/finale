@@ -1,0 +1,20 @@
+opam-version: "2.0"
+name: "cycle"
+version: "0.10.0"
+maintainer: "Takahisa Watanabe <takahisa.watanabe@outlook.com>"
+authors: "Takahisa Watanabe <takahisa.watanabe@outlook.com>"
+license: "MIT"
+homepage: "http://github.com/takahisa/cycle"
+dev-repo: "http://github.com/takahisa/cycle"
+bug-reports: "http://github.com/takahisa/cycle/issues"
+depends: [
+  "ocaml"     { build & >= "4.07.1" }
+  "ocamlfind" { build }
+  "dune"      { build & >= "1.2.1"  }              
+  "base"      { build & >= "0.10.0" }
+  "stdio"     { build & >= "0.10.0" }
+  "ounit"     { test  & >= "2.0.0"  }
+]
+build:      [[ "dune" "build"   "-p" name "-j" jobs]]
+build-test: [[ "dune" "runtest" "-p" name "-j" jobs]]
+install: [[ "dune" "install" ]]
