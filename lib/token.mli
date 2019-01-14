@@ -19,13 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. 
  *)
-open OUnit2
+module type S = sig
+  include Base.Equal.S
+  val of_string: string -> t option
+  val to_string: t -> string option
+end
 
-let all_test =
-  "Cycle" >::: [
-    Iso_test.all_test;
-    Token_test.all_test
-  ]
+val equal: (module S with type t = 'a) -> 'a Base.Equal.equal
+val of_string: (module S with type t = 'a) -> string -> 'a option
+val to_string: (module S with type t = 'a) -> 'a -> string option
 
-let _ =
-  run_test_tt_main all_test
+module Char : S with type t = char
