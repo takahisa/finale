@@ -1,9 +1,0 @@
-(jbuild_version 1)
-(executables
- ((names (calc))
-  (libraries (core finale))))
-
-(alias
- ((name  calc)
-  (deps (calc.exe))
-  (action (run ${<}))))
